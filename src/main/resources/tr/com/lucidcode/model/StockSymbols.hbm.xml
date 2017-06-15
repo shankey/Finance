@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="tr.com.lucidcode.model">
+
+    <class name="StockSymbols" table="stock_symbols">
+        <id name="id" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="bseId" column="bse_id"/>
+        <property name="scrip"/>
+        <property name="company"/>
+        <property name="industry"/>
+        <property name="status"/>
+        <property name="priceStatus" column="price_status"/>
+
+    </class>
+
+</hibernate-mapping>

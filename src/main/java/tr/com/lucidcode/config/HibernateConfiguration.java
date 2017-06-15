@@ -11,10 +11,9 @@ public class HibernateConfiguration {
 	public static ServiceRegistry hibernateConfig() {
 		Properties properties = new Properties();
 		properties.setProperty(Environment.DIALECT,"org.hibernate.dialect.MySQLDialect");
-		properties.setProperty(Environment.URL, "jdbc:mysql://localhost:3306/demoschema");
+		properties.setProperty(Environment.URL, "jdbc:mysql://localhost:3306/finance");
 		properties.setProperty(Environment.DRIVER, "com.mysql.jdbc.Driver");
 		properties.setProperty(Environment.USER, "root");
-		properties.setProperty(Environment.PASS, "root");
 
 		ServiceRegistryBuilder serviceRegistryBuilder = new ServiceRegistryBuilder();
 		serviceRegistryBuilder.applySettings(properties);

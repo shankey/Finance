@@ -13,6 +13,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import tr.com.lucidcode.model.Account;
 import tr.com.lucidcode.model.ResponseAccountList;
+import tr.com.lucidcode.model.StockSymbols;
+import tr.com.lucidcode.scripts.XMLParse;
 import tr.com.lucidcode.service.AccountService;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
@@ -24,7 +26,7 @@ public class HomeController {
 	@Resource(name = "accountService")
 	private AccountService accountService;
 
-	@RequestMapping(value = "/")
+	@RequestMapping(value = "/home")
 	public ModelAndView listAll() {
 		
 		logger.debug("Homepage requested");
@@ -32,28 +34,15 @@ public class HomeController {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("home");
 
-		// add sample data
-		List<Account> accountList = new ArrayList<Account>();
-		accountList.add(new Account("gurarslan", "Omer", "Gurarslan",
-				"111-222-33-34"));
+		List<StockSymbols> stockSymbolsList = null;
 
-		try {
-			for (Account newAccount : accountList) {
-				if (ServiceDispatcher.getAccountService()
-						.getAccountByUsername(newAccount.getUsername())
-						.getAccount() == null) {
-					ServiceDispatcher.getAccountService().insert(newAccount);
-				}
-			}
-		} catch (DataException e) {
-			logger.debug(e.getMessage());
-		}
 
-		ResponseAccountList resultList = accountService
-				.getAllAccountsPagified(0);
+		new XMLParse().main(null);
 
-		modelAndView.addObject("accountList", resultList.getAccountList());
-		modelAndView.addObject("rowCount", resultList.getRowCount());
+
+
+
+		modelAndView.addObject("stockSymbolsList", stockSymbolsList);
 
 		return modelAndView;
 	}

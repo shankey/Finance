@@ -5,6 +5,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import tr.com.lucidcode.service.AccountService;
+import tr.com.lucidcode.service.ReportsService;
 
 @Configuration
 @ComponentScan("tr.com.lucidcode.service")
@@ -14,4 +15,6 @@ public class ServiceConfiguration {
     public AccountService accountService() {
         return new AccountService();
     }
+
+
 }
