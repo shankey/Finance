@@ -33,7 +33,7 @@ public class WebScrapper {
     public void scrapeScrip(StockSymbols ss){
         this.ss = ss;
 
-        String url = urlTemplate.replaceFirst("%code",ss.getBseId());
+        String url = urlTemplate.replaceFirst("%code",ss.getBseId().toString());
         url = url.replaceFirst("%company", URLEncoder.encode(ss.getCompany()));
         generateAndScrapeUrls(url, ss.getStatus());
         System.out.println("Before closing browser " + ss.getCompany());
@@ -116,7 +116,7 @@ public class WebScrapper {
                 .getStocks("Cement &amp; Cement Products");
 
         for(StockSymbols ss: stockSymbolsList){
-            String url = urlTemplate.replaceFirst("%code",ss.getBseId());
+            String url = urlTemplate.replaceFirst("%code",ss.getBseId().toString());
             url = url.replaceFirst("%company", URLEncoder.encode(ss.getCompany()));
             generateAndScrapeUrls(url, new Float(50.0));
         }

@@ -75,7 +75,7 @@ public class StockPriceScrapper {
 
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(15000);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 System.out.println("Sleep Interrupted");

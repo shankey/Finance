@@ -76,7 +76,7 @@ public class XMLParse {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy");
             Date date = null;
             try {
-                date = sdf.parse(map.get(DATE_BEGIN));
+                date = sdf.parse(map.get(DATE_END));
             } catch (ParseException e) {
                 e.printStackTrace();
             }

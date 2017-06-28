@@ -43,4 +43,8 @@ public class StockSymbolsService extends BaseService<Account> {
         stockSymbolsDAO.setPriceStatus(id, status);
     }
 
+    public Integer getBseIdFromScrip(String scrip){
+        return stockSymbolsDAO.getBseIdFromScrip(scrip);
+    }
+
 }

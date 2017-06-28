@@ -15,7 +15,7 @@ import java.util.List;
  * Main service associated with operations on accounts table
  *
  */
-@Service("stockSymbolsService")
+@Service("reportDetailsService")
 public class ReportDetailsService extends BaseService<Account> {
 
     protected static Logger logger = Logger.getLogger("sessionListener");

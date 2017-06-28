@@ -16,5 +16,6 @@
 		<mapping resource="tr/com/lucidcode/model/StockSymbols.hbm.xml"></mapping>
 		<mapping resource="tr/com/lucidcode/model/Reports.hbm.xml"></mapping>
 		<mapping resource="tr/com/lucidcode/model/ReportDetails.hbm.xml"></mapping>
+		<mapping resource="tr/com/lucidcode/model/StockPrice.hbm.xml"></mapping>
 	</session-factory>
 </hibernate-configuration>

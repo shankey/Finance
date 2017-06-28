@@ -200,8 +200,7 @@ public class StockSymbolsDAO extends BaseDao<Account> {
      *
      * get account data by userName, which is unique.
      *
-     * @param industry
-     * @return List<StockSymbols>
+     *
      * @throws DataException
      */
     public void setStatus(Integer id, Float status) throws DataException {
@@ -267,6 +266,31 @@ public class StockSymbolsDAO extends BaseDao<Account> {
             throw new HibernateException(e.getMessage());
         }
     }
+
+    public Integer getBseIdFromScrip(String scrip) throws DataException {
+
+        //validate input
+        if (scrip == null) {
+            return null ;
+        }
+
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+        Criteria crit = session.createCriteria(StockSymbols.class);
+        crit.add(Restrictions.eq("scrip", scrip));
+        StockSymbols existing;
+        try {
+            existing = (StockSymbols) crit.uniqueResult();
+            session.flush();
+            session.getTransaction().commit();
+
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new HibernateException(e.getMessage());
+        }
+        return existing.getBseId();
+    }
+
 
     /**
      *

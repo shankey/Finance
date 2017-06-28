@@ -14,8 +14,8 @@ public class StockSymbols {
     @Column(name = "id")
     private Integer id;
 
-    @NotNull
-    private String bseId;
+
+    private Integer bseId;
 
     private String scrip;
     private String industry;
@@ -39,11 +39,11 @@ public class StockSymbols {
         this.id = id;
     }
 
-    public String getBseId() {
+    public Integer getBseId() {
         return bseId;
     }
 
-    public void setBseId(String bseId) {
+    public void setBseId(Integer bseId) {
         this.bseId = bseId;
     }
 

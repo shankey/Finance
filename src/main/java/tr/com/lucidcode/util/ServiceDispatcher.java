@@ -1,9 +1,6 @@
 package tr.com.lucidcode.util;
 
-import tr.com.lucidcode.service.AccountService;
-import tr.com.lucidcode.service.ReportDetailsService;
-import tr.com.lucidcode.service.ReportsService;
-import tr.com.lucidcode.service.StockSymbolsService;
+import tr.com.lucidcode.service.*;
 
 /**
  * 
@@ -16,6 +13,8 @@ public class ServiceDispatcher {
 	private static StockSymbolsService singletonStockSymbolsService;
 	private static ReportsService singletonReportsService;
 	private static ReportDetailsService singletonReportDetailsService;
+	private static StockPriceService singletonStockPriceService;
+	private static RatioCalculatorService singletonRationCalculatorService;
 
 	public static AccountService getAccountService() {
 		if (singletonAccountService == null) {
@@ -43,5 +42,19 @@ public class ServiceDispatcher {
 			singletonReportDetailsService = new ReportDetailsService();
 		}
 		return singletonReportDetailsService;
+	}
+
+	public static StockPriceService getStockPriceService() {
+		if (singletonStockPriceService == null) {
+			singletonStockPriceService = new StockPriceService();
+		}
+		return singletonStockPriceService;
+	}
+
+	public static RatioCalculatorService getRatioCalculatorService() {
+		if (singletonRationCalculatorService == null) {
+			singletonRationCalculatorService = new RatioCalculatorService();
+		}
+		return singletonRationCalculatorService;
 	}
 }

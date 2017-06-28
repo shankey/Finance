@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="tr.com.lucidcode.model">
+
+    <class name="StockPrice" table="stock_price">
+        <id name="id" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="bseId" column="bse_id"/>
+        <property name="open" column="open"/>
+        <property name="close" column="close"/>
+        <property name="high" column="high"/>
+        <property name="low" column="low"/>
+        <property name="date" column="date"/>
+        <property name="volume" column="volume"/>
+
+    </class>
+
+</hibernate-mapping>
