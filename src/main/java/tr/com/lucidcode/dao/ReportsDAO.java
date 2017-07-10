@@ -12,10 +12,12 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
 import org.springframework.stereotype.Service;
 import tr.com.lucidcode.model.Account;
+import tr.com.lucidcode.model.MoneyControlScrips;
 import tr.com.lucidcode.model.Reports;
 import tr.com.lucidcode.model.StockSymbols;
 import tr.com.lucidcode.util.HibernateUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -56,13 +58,10 @@ public class ReportsDAO extends BaseDao<Account> {
 
             //update user
             if(existingReport == null){
-                existingReport = new Reports();
-                existingReport.setBseId(reports.getBseId());
-                existingReport.setReportType(reports.getReportType());
-                existingReport.setReportDate(reports.getReportDate());
-                session.save(existingReport);
+                existingReport = reports;
             }
 
+            session.saveOrUpdate(existingReport);
             session.flush();
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -87,7 +86,12 @@ public class ReportsDAO extends BaseDao<Account> {
         session.beginTransaction();
 
         final Criteria crit = session.createCriteria(Reports.class);
-        crit.add(Restrictions.eq("bseId", reports.getBseId()));
+        if(reports.getBseId()==null){
+            crit.add(Restrictions.eq("moneyControlId", reports.getMoneyControlId()));
+        }else{
+            crit.add(Restrictions.eq("bseId", reports.getBseId()));
+        }
+
         crit.add(Restrictions.eq("reportDate", reports.getReportDate()));
         crit.add(Restrictions.eq("reportType", reports.getReportType()));
 
@@ -106,38 +110,34 @@ public class ReportsDAO extends BaseDao<Account> {
     }
 
 
-
-    /**
-     *
-     * get account data by userName, which is unique.
-     *
-     * @param industry
-     * @return List<StockSymbols>
-     * @throws DataException
-     */
-    public List<StockSymbols> findReport(String industry) throws DataException {
+    public List<Reports> findReports(List<MoneyControlScrips> moneyControlScrips) throws DataException {
 
         //validate input
-        if (industry == null) {
+        if (moneyControlScrips == null || moneyControlScrips.size()==0) {
             return null;
+        }
+
+        List<String> moneyControlIds = new ArrayList<String>();
+
+        for(MoneyControlScrips moneyControlScrip : moneyControlScrips){
+            moneyControlIds.add(moneyControlScrip.getName());
         }
 
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
-        Criteria crit = session.createCriteria(StockSymbols.class);
-        crit.add(Restrictions.eq("industry", industry));
-        List<StockSymbols> stockSymbols;
+        Criteria crit = session.createCriteria(Reports.class);
+        crit.add(Restrictions.in("moneyControlId", moneyControlIds));
+        List<Reports> reportsList;
         try {
-            stockSymbols = (List<StockSymbols>) crit.list();
+            reportsList = (List<Reports>) crit.list();
             session.flush();
             session.getTransaction().commit();
         } catch (Exception e) {
             session.getTransaction().rollback();
             throw new HibernateException(e.getMessage());
         }
-        logger.info(stockSymbols);
-        System.out.println(stockSymbols);
-        return stockSymbols;
+
+        return reportsList;
     }
 
 

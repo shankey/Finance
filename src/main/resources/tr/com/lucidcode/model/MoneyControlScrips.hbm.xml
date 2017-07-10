@@ -5,14 +5,17 @@
 
 <hibernate-mapping package="tr.com.lucidcode.model">
 
-    <class name="ReportDetails" table="report_details">
+    <class name="MoneyControlScrips" table="moneycontrol_scrips">
         <id name="id" column="id">
             <generator class="native"/>
         </id>
-        <property name="reportId" column="report_id"/>
-        <property name="reportKey" column="report_key"/>
-        <property name="reportValue" column="report_value"/>
-        <property name="reportOrder" column="report_order"/>
+        <property name="name"/>
+        <property name="industry"/>
+        <property name="url"/>
+        <property name="bseId"  column="bse_id"/>
+        <property name="nseId"  column="nse_id"/>
+        <property name="sector"/>
+        <property name="status"/>
 
     </class>
 

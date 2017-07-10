@@ -15,6 +15,8 @@ public class ServiceDispatcher {
 	private static ReportDetailsService singletonReportDetailsService;
 	private static StockPriceService singletonStockPriceService;
 	private static RatioCalculatorService singletonRationCalculatorService;
+	private static MoneyControlScripsService singletonMoneyControlScripService;
+	private static ScripsDataService singletonScripDataService;
 
 	public static AccountService getAccountService() {
 		if (singletonAccountService == null) {
@@ -56,5 +58,19 @@ public class ServiceDispatcher {
 			singletonRationCalculatorService = new RatioCalculatorService();
 		}
 		return singletonRationCalculatorService;
+	}
+
+	public static MoneyControlScripsService getMoneyControlScripService() {
+		if (singletonMoneyControlScripService == null) {
+			singletonMoneyControlScripService = new MoneyControlScripsService();
+		}
+		return singletonMoneyControlScripService;
+	}
+
+	public static ScripsDataService getScripsDataService() {
+		if (singletonScripDataService == null) {
+			singletonScripDataService = new ScripsDataService();
+		}
+		return singletonScripDataService;
 	}
 }

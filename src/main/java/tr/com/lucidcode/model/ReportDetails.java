@@ -18,6 +18,7 @@ public class ReportDetails {
 
     private String reportKey;
     private String reportValue;
+    private Integer reportOrder;
 
     public Integer getId() {
         return id;
@@ -49,6 +50,14 @@ public class ReportDetails {
 
     public void setReportValue(String reportValue) {
         this.reportValue = reportValue;
+    }
+
+    public Integer getReportOrder() {
+        return reportOrder;
+    }
+
+    public void setReportOrder(Integer reportOrder) {
+        this.reportOrder = reportOrder;
     }
 
     @Override

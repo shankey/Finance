@@ -17,11 +17,14 @@ public class Reports {
     @Column(name = "id")
     private Integer id;
 
-    @NotNull
+
     private String bseId;
 
     private String reportType;
     private Date reportDate;
+    private Integer source;
+    private String nseId;
+    private String moneyControlId;
 
 
     public Integer getId() {
@@ -55,6 +58,36 @@ public class Reports {
     public void setReportDate(Date reportDate) {
         this.reportDate = reportDate;
     }
+
+    public Integer getSource() {
+        return source;
+    }
+
+    public void setSource(Integer source) {
+        this.source = source;
+    }
+
+    public String getNseId() {
+        return nseId;
+    }
+
+    public void setNseId(String nseId) {
+        this.nseId = nseId;
+    }
+
+    public String getMoneyControlId() {
+        return moneyControlId;
+    }
+
+    public void setMoneyControlId(String moneyControlId) {
+        this.moneyControlId = moneyControlId;
+    }
+
+    public String toString(){
+        return source + " " + moneyControlId;
+    }
 }
+
+
 
 

@@ -12,6 +12,9 @@
         <property name="bseId" column="bse_id"/>
         <property name="reportType" column="report_type"/>
         <property name="reportDate" column="report_date"/>
+        <property name="nseId" column="nse_id"/>
+        <property name="moneyControlId" column="money_control_id"/>
+        <property name="source" />
 
     </class>
 

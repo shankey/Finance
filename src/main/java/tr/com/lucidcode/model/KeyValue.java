@@ -6,7 +6,14 @@ package tr.com.lucidcode.model;
 public class KeyValue {
 
     public String key;
-    public String value;
+    public Object value;
+    private Integer order;
+
+    public KeyValue(String key, Object value, Integer order){
+        this.key = key;
+        this.value = value;
+        this.order = order;
+    }
 
     public String getKey() {
         return key;
@@ -16,12 +23,20 @@ public class KeyValue {
         this.key = key;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
+    }
+
+    public Integer getOrder() {
+        return order;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
     }
 
     @Override

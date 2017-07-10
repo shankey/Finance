@@ -33,4 +33,8 @@ public class ReportDetailsService extends BaseService<Account> {
         reportDetailsDAO.insert(reportDetails);
     }
 
+    public void insert(List<ReportDetails> listReportDetails){
+        reportDetailsDAO.insertAll(listReportDetails);
+    }
+
 }

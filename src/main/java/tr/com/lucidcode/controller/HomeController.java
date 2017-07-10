@@ -1,6 +1,8 @@
 package tr.com.lucidcode.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import tr.com.lucidcode.model.StockSymbols;
+import tr.com.lucidcode.pojo.DateValue;
+import tr.com.lucidcode.pojo.MoneyControlDataOutput;
 import tr.com.lucidcode.pojo.PricesOutput;
 import tr.com.lucidcode.pojo.ReportVariableOutput;
 import tr.com.lucidcode.scripts.XMLParse;
@@ -140,6 +144,7 @@ public class HomeController {
 
 	}
 
+
 	public void addCORS(HttpServletResponse response){
 		response.setHeader( "Pragma", "no-cache" );
 		response.setHeader( "Cache-Control", "no-cache" );
@@ -149,5 +154,27 @@ public class HomeController {
 		response.addHeader("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
 		response.addHeader("Access-Control-Allow-Headers", "accept, content-type, x-parse-application-id, x-parse-rest-api-key, x-parse-session-token");
 
+	}
+
+	@RequestMapping(value = "/mcdata", produces = "application/json")
+	@ResponseBody
+	public String MCData(HttpServletResponse response){
+
+		List<String> list = new ArrayList<String>();
+		list.add("ROCE");
+		list.add("DILUTED EPS");
+
+		Map<String, Map<String, List<DateValue>>> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector("cementmajor", list);
+
+		addCORS(response);
+
+		logger.debug("MC Data requested");
+
+		Gson gson = new GsonBuilder().setPrettyPrinting()
+				.setDateFormat("dd-MM-yyyy").create();
+
+		String jsonProfitOutput = gson.toJson(ratioScripDataMap);
+
+		return jsonProfitOutput;
 	}
 }
