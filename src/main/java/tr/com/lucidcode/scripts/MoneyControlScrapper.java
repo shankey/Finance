@@ -84,7 +84,7 @@ public class MoneyControlScrapper {
     public void getAllScrips(){
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
-        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry("cementmajor");
+        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry("cementmini");
         for(MoneyControlScrips mcs: list){
             System.out.println("-----NEXT SCRIP------ " + mcs.getName());
             scrapeScrip(mcs);
@@ -151,7 +151,7 @@ public class MoneyControlScrapper {
                 WebElement qtr = driver.findElement(By.cssSelector(".boxBg"));
                 System.out.println(qtr.getAttribute("innerHTML"));
 
-                FileUtils.createFile(scripFolder + "/" +reportType + ".txt", qtr.getAttribute("innerHTML"));
+                FileUtils.createFile(scripFolder + "/" +reportType + i + ".txt", qtr.getAttribute("innerHTML"));
             }
         }
 

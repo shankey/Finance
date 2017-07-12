@@ -164,7 +164,7 @@ public class HomeController {
 		list.add("ROCE");
 		list.add("DILUTED EPS");
 
-		Map<String, Map<String, List<DateValue>>> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector("cementmajor", list);
+		Map<String, Map<String, Map<String, List<DateValue>>>> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector("cementmajor", list);
 
 		addCORS(response);
 

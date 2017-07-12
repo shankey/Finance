@@ -36,7 +36,7 @@ public class ReportDetailsDAO extends BaseDao<Account> {
     public static final String moneyControlSripDetailsQuery = "select mcs.name, r.report_type, r.report_date, rkm.report_key_mapping, rd.report_value " +
             "from moneycontrol_scrips mcs, reports r, report_details rd, report_key_mappings rkm " +
             "where mcs.industry='%industry' and mcs.name=r.money_control_id and rd.report_id=r.id " +
-            "and rkm.report_key=rd.report_key and rkm.report_key_mapping in (%datakeys) and r.report_type like '%cons%';";
+            "and rkm.report_key=rd.report_key and rkm.report_key_mapping in (%datakeys) ;";
 
 
     public String getWhereClause(List<String> ssList){
