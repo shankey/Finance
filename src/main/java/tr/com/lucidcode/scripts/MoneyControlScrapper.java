@@ -1,17 +1,22 @@
 package tr.com.lucidcode.scripts;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.firefox.internal.ProfilesIni;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriverService;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import tr.com.lucidcode.model.MoneyControlScrips;
 import tr.com.lucidcode.model.StockSymbols;
 import tr.com.lucidcode.util.FileUtils;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -19,8 +24,9 @@ import java.util.concurrent.TimeUnit;
 public class MoneyControlScrapper {
 
     ProfilesIni profile = new ProfilesIni();
-    FirefoxProfile ffprofile = profile.getProfile("Selenium");
-    WebDriver driver = new FirefoxDriver(ffprofile);
+    //FirefoxProfile ffprofile = profile.getProfile("Selenium");
+    WebDriver driver = null;//new FirefoxDriver(ffprofile);
+
 
     public static String CONS_QUARTERLY = "cons_quarterly";
     public static String CONS_YEARLY = "cons_yearly";
@@ -41,7 +47,8 @@ public class MoneyControlScrapper {
 
     String stockFindTemplate = "http://www.moneycontrol.com/india/stockpricequote/%character";
 
-    String baseFolder = "/Users/adinema/Documents/MoneyControl/";
+    String baseFolder = "./MoneyControl/";
+            //"/Users/adinema/Documents/MoneyControl/";
 
     public void fillStockUrlsTemplate(){
         for(char alphabet = 'A'; alphabet <= 'Z';alphabet++) {
@@ -55,7 +62,7 @@ public class MoneyControlScrapper {
     public void scrapeScripUrls(String url){
 
 
-        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
         driver.navigate().to(url);
         System.out.println("Try to find stock URLs");
@@ -82,10 +89,34 @@ public class MoneyControlScrapper {
     }
 
     public void getAllScrips(){
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
-        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry("cementmini");
+        Capabilities caps = new DesiredCapabilities();
+
+        ((DesiredCapabilities) caps).setJavascriptEnabled(true);
+
+
+        ((DesiredCapabilities) caps).setCapability(
+                PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
+                "/Users/adinema/Documents/Finance/phantomjs/bin/phantomjs"
+
+        );
+
+        driver = new PhantomJSDriver(caps);
+
+
+
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+
+
+        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry("financehousing");
+        System.out.println(list);
+
+
         for(MoneyControlScrips mcs: list){
+            if(mcs.getStatus() != null && mcs.getStatus()==1){
+                continue;
+            }
             System.out.println("-----NEXT SCRIP------ " + mcs.getName());
             scrapeScrip(mcs);
         }
@@ -125,6 +156,9 @@ public class MoneyControlScrapper {
         driver.navigate().to(url);
         sleep(500);
 
+        if(driver.findElements(By.cssSelector(".boxBg")).size()<=0){
+            return;
+        }
         WebElement element = driver.findElement(By.cssSelector(".boxBg"));
         System.out.println(element.getAttribute("innerHTML"));
 
@@ -136,8 +170,14 @@ public class MoneyControlScrapper {
         String url = template.replaceAll("%financial_type", reportType);
         driver.navigate().to(url);
 
-        WebElement qtr1 = driver.findElement(By.cssSelector(".boxBg"));
+        WebElement qtr1 = null;
+        if(driver.findElements(By.cssSelector(".boxBg")).size() <= 0){
+            return;
+        }
+
+        qtr1 = driver.findElement(By.cssSelector(".boxBg"));
         System.out.println(qtr1.getAttribute("innerHTML"));
+
 
         FileUtils.createFile(scripFolder + "/" + reportType + ".txt", qtr1.getAttribute("innerHTML"));
 
@@ -148,6 +188,9 @@ public class MoneyControlScrapper {
                 prevYear.click();
                 sleep(500);
 
+                if(driver.findElements(By.cssSelector(".boxBg")).size()<=0){
+                    return;
+                }
                 WebElement qtr = driver.findElement(By.cssSelector(".boxBg"));
                 System.out.println(qtr.getAttribute("innerHTML"));
 
@@ -159,7 +202,13 @@ public class MoneyControlScrapper {
 
     private void getScripIds(MoneyControlScrips mcs){
         driver.navigate().to(mcs.getUrl());
-        WebElement scripDetailsElement = driver.findElement(By.cssSelector(".PB10 > .FL.gry10"));
+        WebElement scripDetailsElement=null;
+        if(driver.findElements(By.cssSelector(".PB10 > .FL.gry10")).size() > 0){
+            scripDetailsElement = driver.findElement(By.cssSelector(".PB10 > .FL.gry10"));
+        }else {
+            return;
+        }
+
         String scripDetailsString = scripDetailsElement.getText();
         System.out.println("scrip details element"+ scripDetailsElement.getText());
 
@@ -170,13 +219,20 @@ public class MoneyControlScrapper {
             System.out.println(scripDetails[i]);
         }
 
-        Integer bseId = Integer.parseInt(scripDetails[0].split(":")[1].trim());
-        String nseId = scripDetails[1].split(":")[1].trim();
-        String sector = scripDetails[3].split(":")[1].trim();
+        try{
+            Integer bseId = Integer.parseInt(scripDetails[0].split(":")[1].trim());
+            mcs.setBseId(bseId);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+            String nseId = scripDetails[1].split(":")[1].trim();
+            String sector = scripDetails[3].split(":")[1].trim();
 
-        mcs.setBseId(bseId);
-        mcs.setNseId(nseId);
-        mcs.setSector(sector);
+
+            mcs.setNseId(nseId);
+            mcs.setSector(sector);
+
+
 
         ServiceDispatcher.getMoneyControlScripService().insert(mcs);
 
@@ -195,98 +251,6 @@ public class MoneyControlScrapper {
         }
     }
 
-//    public void scrapeScripOld(MoneyControlScrips mcs){
-//
-//        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
-//        System.out.print(mcs.getUrl());
-//        driver.navigate().to(mcs.getUrl());
-//        WebElement scripDetailsElement = driver.findElement(By.cssSelector(".PB10 > .FL.gry10"));
-//        System.out.println(scripDetailsElement.getText());
-//
-//        WebElement financialButtonElement = driver.findElement(By.xpath("//span[contains(text(), 'Financials')]"));
-//        financialButtonElement.click();
-//
-//
-//        try {
-//                Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//                // TODO Auto-generated catch block
-//                System.out.println("Sleep Interrupted");
-//                e.printStackTrace();
-//        }
-//
-//        WebElement profitAndLossButtonElement = driver.findElement(By.xpath("//a[contains(text(), 'Profit & Loss') and @class='bl_11']"));
-//        profitAndLossButtonElement.click();
-//
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            System.out.println("Sleep Interrupted");
-//            e.printStackTrace();
-//        }
-//
-//        WebElement selectReportButton = driver.findElement(By.xpath("//select[@class='det']"));
-//        selectReportButton.click();
-//
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            System.out.println("Sleep Interrupted");
-//            e.printStackTrace();
-//        }
-//
-//        WebElement consolidatedQuarterlyElement = driver.findElement(By.xpath("//option[@value='7']"));
-//        consolidatedQuarterlyElement.click();
-//
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            System.out.println("Sleep Interrupted");
-//            e.printStackTrace();
-//        }
-//
-//        WebElement goButtonElement = driver.findElement(By.xpath("//input[@type='Image']"));
-//        goButtonElement.click();
-//
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            System.out.println("Sleep Interrupted");
-//            e.printStackTrace();
-//        }
-//
-//        WebElement qtr1 = driver.findElement(By.cssSelector(".boxBg"));
-//
-//        System.out.println(qtr1.getAttribute("innerHTML"));
-//
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            System.out.println("Sleep Interrupted");
-//            e.printStackTrace();
-//        }
-//
-//        WebElement prevYear = driver.findElement(By.xpath("//a[@class='prevnext']/b[contains(text(), 'Previous')]"));
-//        prevYear.click();
-//
-//
-//
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            System.out.println("Sleep Interrupted");
-//            e.printStackTrace();
-//        }
-//
-//        closeBrowser();
-//
-//    }
 
     public void setupFireFox(){
         FirefoxProfile profile = new FirefoxProfile();
@@ -310,6 +274,7 @@ public class MoneyControlScrapper {
 
     @PostConstruct
     public static void main(String[] args) throws IOException {
+
         MoneyControlScrapper stockPriceScrapper = new MoneyControlScrapper();
 
         stockPriceScrapper.getAllScrips();

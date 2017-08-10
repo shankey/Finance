@@ -12,7 +12,7 @@ import java.util.Date;
 /**
  * Created by adinema on 15/06/17.
  */
-public class StockPrice {
+public class StockPrice implements Comparable  {
 
     @Id
     @GeneratedValue
@@ -97,5 +97,11 @@ public class StockPrice {
 
     public String toString(){
         return bseId + " " + open + " " + close;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Date oDate = (Date)o;
+        return date.compareTo(oDate);
     }
 }

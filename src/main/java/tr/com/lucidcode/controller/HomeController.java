@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
@@ -13,6 +14,7 @@ import com.google.gson.GsonBuilder;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -41,12 +43,10 @@ public class HomeController {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("home");
 
-		List<StockSymbols> stockSymbolsList = null;
+		List<String> industries = ServiceDispatcher.getMoneyControlScripService().getAllIndustries();
 
 
-		new XMLParse().main(null);
-
-		modelAndView.addObject("stockSymbolsList", stockSymbolsList);
+		modelAndView.addObject("industries", industries);
 
 		return modelAndView;
 	}
@@ -164,7 +164,7 @@ public class HomeController {
 		list.add("ROCE");
 		list.add("DILUTED EPS");
 
-		Map<String, Map<String, Map<String, List<DateValue>>>> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector("cementmajor", list);
+		List<List> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector("cementmajor", list);
 
 		addCORS(response);
 
@@ -174,6 +174,27 @@ public class HomeController {
 				.setDateFormat("dd-MM-yyyy").create();
 
 		String jsonProfitOutput = gson.toJson(ratioScripDataMap);
+
+		return jsonProfitOutput;
+	}
+
+	@RequestMapping(value = "/mcscrape", produces = "application/json", method = RequestMethod.GET)
+	@ResponseBody
+	public String MCScrape(HttpServletResponse response, HttpServletRequest request){
+
+		Map<String, String[]> map = request.getParameterMap();
+
+		for(String key: map.keySet()){
+			logger.info("Parms = " + key);
+			for(String value: map.get(key)){
+				logger.info("Parm Value = "+ value);
+			}
+		}
+
+		Gson gson = new GsonBuilder().setPrettyPrinting()
+				.setDateFormat("dd-MM-yyyy").create();
+
+		String jsonProfitOutput = gson.toJson("");
 
 		return jsonProfitOutput;
 	}

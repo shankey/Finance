@@ -20,6 +20,7 @@ public class MoneyControlScrips {
     private String nseId;
     private String sector;
     private Integer status;
+    private Integer priceStatus;
 
     public Integer getId() {
         return id;
@@ -83,6 +84,14 @@ public class MoneyControlScrips {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Integer getPriceStatus() {
+        return priceStatus;
+    }
+
+    public void setPriceStatus(Integer priceStatus) {
+        this.priceStatus = priceStatus;
     }
 
     @Override

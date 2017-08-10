@@ -19,5 +19,7 @@
 		<mapping resource="tr/com/lucidcode/model/ReportDetails.hbm.xml"></mapping>
 		<mapping resource="tr/com/lucidcode/model/StockPrice.hbm.xml"></mapping>
 		<mapping resource="tr/com/lucidcode/model/MoneyControlScrips.hbm.xml"></mapping>
+		<mapping resource="tr/com/lucidcode/model/MutualFunds.hbm.xml"></mapping>
+		<mapping resource="tr/com/lucidcode/model/MutualFundsPerformance.hbm.xml"></mapping>
 	</session-factory>
 </hibernate-configuration>

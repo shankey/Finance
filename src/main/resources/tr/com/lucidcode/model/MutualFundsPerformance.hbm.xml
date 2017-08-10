@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="tr.com.lucidcode.model">
+
+    <class name="MutualFundsPerformance" table="mutual_funds_performance">
+        <id name="id" column="id">
+            <generator class="native"/>
+        </id>
+
+        <property name="mutualFundId"  column="mutual_fund_id"/>
+        <property name="nav"  column="fund_house"/>
+        <property name="repurchasePrice" column="repurchase_price"/>
+        <property name="date"/>
+        <property name="salePrice" column="sale_price"/>
+
+    </class>
+
+</hibernate-mapping>

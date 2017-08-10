@@ -8,6 +8,7 @@ import tr.com.lucidcode.pojo.DateValue;
 import tr.com.lucidcode.pojo.MoneyControlDataCSV;
 import tr.com.lucidcode.pojo.MoneyControlDataOutput;
 import tr.com.lucidcode.util.CsvFileWriter;
+import tr.com.lucidcode.util.Strings;
 import tr.com.lucidcode.util.Utils;
 
 import java.text.ParseException;
@@ -29,8 +30,9 @@ public class ScripsDataService extends BaseService<Account> {
     ReportDetailsDAO reportDetailsDAO = new ReportDetailsDAO();
     MoneyControlScripsDAO moneyControlScripsDAO = new MoneyControlScripsDAO();
     ReportKeyMappingsDAO reportKeyMappingsDAO = new ReportKeyMappingsDAO();
+    StockPriceDAO stockPriceDAO = new StockPriceDAO();
 
-    public Map<String, Map<String, Map<String, List<DateValue>>>> getDataForSector(String sector, List<String> listData){
+    public List<List> getDataForSector(String sector, List<String> listData){
 
         List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMapping(sector, listData);
 
@@ -71,9 +73,9 @@ public class ScripsDataService extends BaseService<Account> {
 
         }
 
-        writeCSV(sector, ratioTypeScripDataMap);
+        calculatePE(sector, ratioTypeScripDataMap);
 
-        return ratioTypeScripDataMap;
+        return writeCSV(sector, ratioTypeScripDataMap);
 
 
     }
@@ -183,7 +185,7 @@ public class ScripsDataService extends BaseService<Account> {
 
     }
 
-    private void writeCSV(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
+    private List<List> writeCSV(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
         List<List> csvList = new ArrayList<List>();
         for(String ratio: ratioTypeScripDataMap.keySet()){
             Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(ratio);
@@ -254,6 +256,14 @@ public class ScripsDataService extends BaseService<Account> {
                             li2.add(type);
                             li2.add(scrip);
 
+                            List li3 = new ArrayList(15);
+                            li3.add(ratio);
+                            li3.add(type);
+                            li3.add(scrip);
+
+                            Float[] arr3 = new Float[10];
+
+
 
                             int init = 0;
                             for (DateValue dateValue : dataList) {
@@ -272,8 +282,21 @@ public class ScripsDataService extends BaseService<Account> {
                                 li1.add(dateValue.getDate());
                                 li2.add(dateValue.getValue());
                             }
+
+
+                            for (DateValue dateValue : dataList) {
+                                Integer index = getClosestIndex(dateValue.getDate(), compliantDateSet1);
+                                System.out.println(index);
+                                arr3[index] = dateValue.getValue();
+                            }
+
+                            for(Float fl: arr3){
+                                li3.add(fl);
+                            }
+
                             csvList.add(li1);
                             csvList.add(li2);
+                            csvList.add(li3);
                         }
                     }
                 }
@@ -281,9 +304,130 @@ public class ScripsDataService extends BaseService<Account> {
         }
 
         CsvFileWriter.writeCsvFile(csvOutputFile + sector + ".csv", getCSVHeader(), csvList);
+        return csvList;
     }
 
+    public Integer getClosestIndex(Date inputDate, Set<Date> compliantDateSet){
+        List<Date> compliantDateList = new ArrayList();
+        compliantDateList.addAll(compliantDateSet);
+        Collections.sort(compliantDateList);
 
+        Long closest = 5000l;
+        Integer closestIndex = -1;
+        Integer index = 0;
+        for(Date date: compliantDateList){
+            Long diff = Math.abs(Utils.getDays(inputDate, date));
+
+            if(closest > diff){
+                closest = diff;
+                closestIndex = index;
+            }
+
+            index++;
+        }
+
+        return closestIndex;
+    }
+
+    private void calculatePE(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
+        Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(Strings.DILUTED_EPS);
+
+        Map<String, Map<Date, StockPrice>> bseIdPriceMap = getPricesForIndustry(sector);
+        for(String reportType : typeScripDataMap.keySet()){
+
+            Map<String, List<DateValue>> scripDataMap = typeScripDataMap.get(reportType);
+
+            for(String scrip : scripDataMap.keySet()){
+                List<DateValue> priceList = new ArrayList<DateValue>();
+                List<DateValue> pbyeList = new ArrayList<DateValue>();
+
+                Map<Date, StockPrice> spList = bseIdPriceMap.get(scrip);
+                if(spList==null){
+                    System.out.println("No prices for "+scrip);
+                    continue;
+                }
+                Set<Date> dateSet = spList.keySet();
+
+                List<DateValue> dataList = scripDataMap.get(scrip);
+
+                for(DateValue dateValue: dataList){
+                    Date dt = Utils.get3MonthsClosestForward(dateValue.getDate(), dateSet);
+                    if(dt==null){
+                        continue;
+                    }
+                    StockPrice peStockPrice = spList.get(dt);
+
+                    DateValue dv= new DateValue();
+                    dv.setDate(dateValue.getDate());
+                    dv.setValue(peStockPrice.getClose());
+
+                    priceList.add(dv);
+
+
+                    if(peStockPrice.getClose()!=null && dateValue.getValue()!=null){
+                        DateValue peDv= new DateValue();
+                        peDv.setDate(dateValue.getDate());
+                        peDv.setValue(peStockPrice.getClose()/dateValue.getValue());
+                        pbyeList.add(peDv);
+                    }
+
+                }
+
+                insertIntoMap(pbyeList, scrip, reportType, "PE", ratioTypeScripDataMap);
+                insertIntoMap(priceList, scrip, reportType, "prices", ratioTypeScripDataMap);
+
+            }
+        }
+    }
+
+    private void insertIntoMap(List<DateValue> dateList, String scrip, String reportType, String ratio, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
+
+        if(!ratioTypeScripDataMap.containsKey(ratio)){
+            Map<String, Map<String, List<DateValue>>> peTypeScripDataMap = new HashMap<String, Map<String, List<DateValue>>>();
+            ratioTypeScripDataMap.put(ratio, peTypeScripDataMap);
+        }
+
+        Map<String, Map<String, List<DateValue>>> peTypeScripDataMap = ratioTypeScripDataMap.get(ratio);
+
+        if(!peTypeScripDataMap.containsKey(reportType)){
+            Map<String, List<DateValue>> peScripDataMap = new HashMap<String, List<DateValue>>();
+            peTypeScripDataMap.put(reportType, peScripDataMap);
+        }
+
+        Map<String, List<DateValue>> peScripDataMap = peTypeScripDataMap.get(reportType);
+
+        if(!peScripDataMap.containsKey(scrip)){
+            List<DateValue> peDataMap = new ArrayList<DateValue>();
+            peScripDataMap.put(scrip, peDataMap);
+        }
+
+        peScripDataMap.get(scrip).addAll(dateList);
+
+    }
+
+    private Map<String, Map<Date, StockPrice>> getPricesForIndustry(String sector){
+        System.out.println("INSIDE getPrices");
+        List<MoneyControlScrips> mcsList = moneyControlScripsDAO.getByIndustry(sector);
+        System.out.println("mcsList = "+mcsList);
+        Map<Integer, String> bseIdsScripMap = new HashMap<Integer, String>();
+        for(MoneyControlScrips mcs: mcsList){
+            bseIdsScripMap.put(mcs.getBseId(), mcs.getName());
+        }
+        List<StockPrice> spsList = stockPriceDAO.findByBseIds(new ArrayList<Integer>(bseIdsScripMap.keySet()));
+        System.out.println("spsList =" + spsList);
+
+        Map<String, Map<Date, StockPrice>> scripPriceMap = new HashMap<String, Map<Date, StockPrice>>();
+
+        for(StockPrice sp: spsList){
+            String scrip = bseIdsScripMap.get(sp.getBseId());
+            if(!scripPriceMap.containsKey(scrip)){
+                scripPriceMap.put(scrip, new HashMap<Date, StockPrice>());
+            }
+            scripPriceMap.get(scrip).put(sp.getDate(), sp);
+        }
+
+        return scripPriceMap;
+    }
 
 
     private Object[] getCSVHeader(){

@@ -16,6 +16,7 @@
         <property name="nseId"  column="nse_id"/>
         <property name="sector"/>
         <property name="status"/>
+        <property name="priceStatus" column="price_status"/>
 
     </class>
 

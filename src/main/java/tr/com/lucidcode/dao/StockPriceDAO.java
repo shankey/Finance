@@ -56,6 +56,23 @@ public class StockPriceDAO extends BaseDao<Account> {
     }
 
 
+    public List<StockPrice> findByBseIds(List<Integer> bseIds) throws DataException {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+        final Criteria crit = session.createCriteria(StockPrice.class);
+        crit.add(Restrictions.in("bseId", bseIds));
+        List<StockPrice> stockPriceList;
+        try {
+            stockPriceList = crit.list();
+            session.flush();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new HibernateException(e.getMessage());
+        }
+        return stockPriceList;
+    }
+
 
 
     /**

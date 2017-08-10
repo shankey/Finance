@@ -11,10 +11,12 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import tr.com.lucidcode.model.MoneyControlScrips;
 import tr.com.lucidcode.model.StockSymbols;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
@@ -25,17 +27,14 @@ public class StockPriceScrapper {
     ProfilesIni profile = new ProfilesIni();
     FirefoxProfile ffprofile = profile.getProfile("Selenium");
     WebDriver driver = new FirefoxDriver(ffprofile);
-    StockSymbols ss = null;
+
 
     String urlTemplate = "https://in.finance.yahoo.com/quote/%scrip.BO/history";
 
+    public void scrape(String url, MoneyControlScrips mcs){
 
 
-
-    public void scrape(String url, StockSymbols ss){
-
-
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
 
         driver.navigate().to(url);
         System.out.println("Try to click on dates");
@@ -69,7 +68,8 @@ public class StockPriceScrapper {
                 e.printStackTrace();
             }
 
-            driver.findElement(By.cssSelector(".Bgc\\(\\$actionBlue\\).Fz\\(s\\).D\\(ib\\).Cur\\(p\\).Td\\(n\\).Fl\\(end\\)")).click();
+            driver.findElement(By.xpath("//span[text()='Apply']/..")).click();
+            //driver.findElement(By.cssSelector(".Bgc\\(\\$actionBlue\\).Fz\\(s\\).D\\(ib\\).Cur\\(p\\).Td\\(n\\).Fl\\(end\\)")).click();
             System.out.println("Clicked on apply");
 
 
@@ -82,9 +82,14 @@ public class StockPriceScrapper {
                 e.printStackTrace();
             }
 
-            driver.findElement(By.cssSelector(".Va\\(m\\)\\!.Mend\\(5px\\).Fill\\(\\$actionBlue\\)\\!.Cur\\(p\\)")).click();
-            System.out.println("Clicked on download");
-            ServiceDispatcher.getStockSymbolsService().setPriceStatus(ss.getId(), 1);
+            try{
+                driver.findElement(By.cssSelector(".Va\\(m\\)\\!.Mend\\(5px\\).Fill\\(\\$actionBlue\\)\\!.Cur\\(p\\)")).click();
+                System.out.println("Clicked on download");
+                ServiceDispatcher.getMoneyControlScripService().setPriceStatus(mcs.getId(), 1);
+
+            }catch (Exception e){
+                ServiceDispatcher.getMoneyControlScripService().setPriceStatus(mcs.getId(), -1);
+            }
 
 
             try {
@@ -118,20 +123,33 @@ public class StockPriceScrapper {
 
     // Not used in threadpool
     public void getAllCompaniesAndScrape(){
-        List<StockSymbols> stockSymbolsList = ServiceDispatcher.getStockSymbolsService()
-                .getStocks("Cement &amp; Cement Products");
+        List<MoneyControlScrips> moneyControlScripsList = ServiceDispatcher.getMoneyControlScripService()
+                .getAllByIndustry("chemicals");
 
-        for(StockSymbols ss: stockSymbolsList){
-            if(ss.getPriceStatus()==0){
-                String url = urlTemplate.replaceFirst("%scrip",ss.getScrip());
+        for(MoneyControlScrips mcs: moneyControlScripsList){
+            System.out.println(mcs.getBseId());
+            StockSymbols ss = ServiceDispatcher.getStockSymbolsService().getByBseId(mcs.getBseId());
+
+
+            if(ss==null || ss.getScrip()==null){
+                System.out.println("bse ss not found ---- " + mcs.getBseId());
+                ServiceDispatcher.getMoneyControlScripService().setPriceStatus(mcs.getId(), -1);
+                continue;
+            }
+
+
+            String scrip = ServiceDispatcher.getStockSymbolsService().getByBseId(mcs.getBseId()).getScrip();
+            if(mcs.getPriceStatus()==0){
+                String url = urlTemplate.replaceFirst("%scrip",scrip);
                 System.out.println("Url to go to " + url);
-                scrape(url, ss);
+                scrape(url, mcs);
             }
         }
     }
 
     @PostConstruct
     public static void main(String[] args) throws IOException {
+        System.setProperty("webdriver.chrome.driver", "/Users/adinema/Documents/Finance/chromedriver");
         StockPriceScrapper stockPriceScrapper = new StockPriceScrapper();
         //webSrcapper.setupFireFox();
         stockPriceScrapper.getAllCompaniesAndScrape();

@@ -32,138 +32,6 @@ public class StockSymbolsDAO extends BaseDao<Account> {
 
     /**
      *
-     * updates given fields of a user other than the userName
-     *
-     * @param account
-     * @return updated account
-     * @throws ConstraintViolationException
-     */
-//    public Account update(Account account) throws ConstraintViolationException {
-//
-//        if (account == null) {
-//            throw new IllegalArgumentException();
-//        }
-//
-//        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-//        session.beginTransaction();
-//
-//        //get existing user
-//
-//        Criteria crit = session.createCriteria(Account.class);
-//        crit.add(Restrictions.eq("username", account.getUsername()));
-//
-//        Account existing;
-//        try {
-//            existing = (Account) crit.uniqueResult();
-//            if (existing == null) {
-//                logger.debug("User could not be found");
-//                session.getTransaction().rollback();
-//                return null;
-//            }
-//
-//            //update user
-//
-//            existing.setName(account.getName());
-//            existing.setSurname(account.getSurname());
-//            existing.setPhoneNumber(account.getPhoneNumber());
-//            session.save(existing);
-//            session.flush();
-//            session.getTransaction().commit();
-//        } catch (Exception e) {
-//            session.getTransaction().rollback();
-//            throw new HibernateException(e.getMessage());
-//        }
-//
-//        return account;
-//    }
-
-    /**
-     *
-     * get a window of results from accounts table.
-     * page number starts with 0.
-     *
-     * @return list of accounts
-     * @throws DataException
-     */
-    public List<Account> findAllPagified(Integer pageNum) throws DataException {
-
-        //fix page number if null
-        if (pageNum == null) {
-            pageNum = 0;
-        }
-
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.beginTransaction();
-        final Criteria crit = session.createCriteria(Account.class);
-        crit.setMaxResults(DEFAULT_PAGE_SIZE);
-        crit.setFirstResult(DEFAULT_PAGE_SIZE * pageNum);
-        List<Account> accountList;
-        try {
-            accountList = crit.list();
-            session.flush();
-            session.getTransaction().commit();
-        } catch (DataException e) {
-            session.getTransaction().rollback();
-            throw e;
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new HibernateException(e.getMessage());
-        }
-        return accountList;
-
-    }
-
-    /**
-     *
-     * get all results unpagified.
-     *
-     * @return List of accounts
-     * @throws DataException
-     */
-    public List<Account> findAll() throws DataException {
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.beginTransaction();
-        final Criteria crit = session.createCriteria(Account.class);
-        List<Account> accountList;
-        try {
-            accountList = crit.list();
-            session.flush();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new HibernateException(e.getMessage());
-        }
-        return accountList;
-
-    }
-
-    /**
-     *
-     * get number of rows in the accounts table
-     *
-     * @return Long - number of rows
-     * @throws DataException
-     */
-    public Long getRowCount() throws DataException {
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.beginTransaction();
-        final Criteria crit = session.createCriteria(Account.class);
-        crit.setProjection(Projections.rowCount());
-        Long count;
-        try {
-            count = (Long) crit.uniqueResult();
-            session.flush();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new HibernateException(e.getMessage());
-        }
-        return count;
-
-    }
-
-    /**
-     *
      * get account data by userName, which is unique.
      *
      * @param industry
@@ -289,6 +157,30 @@ public class StockSymbolsDAO extends BaseDao<Account> {
             throw new HibernateException(e.getMessage());
         }
         return existing.getBseId();
+    }
+
+    public StockSymbols getByBseId(Integer bseId) throws DataException {
+
+        //validate input
+        if (bseId == null) {
+            return null ;
+        }
+
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+        Criteria crit = session.createCriteria(StockSymbols.class);
+        crit.add(Restrictions.eq("bseId", bseId));
+        StockSymbols existing;
+        try {
+            existing = (StockSymbols) crit.uniqueResult();
+            session.flush();
+            session.getTransaction().commit();
+
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new HibernateException(e.getMessage());
+        }
+        return existing;
     }
 
 

@@ -12,6 +12,10 @@ public class DateValue implements Comparable<DateValue>{
         this.value = value;
     }
 
+    public DateValue(){
+
+    }
+
     public Date date;
     public Float value;
 

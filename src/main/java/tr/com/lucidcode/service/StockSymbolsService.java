@@ -47,4 +47,8 @@ public class StockSymbolsService extends BaseService<Account> {
         return stockSymbolsDAO.getBseIdFromScrip(scrip);
     }
 
+    public StockSymbols getByBseId(Integer bseId){
+        return stockSymbolsDAO.getByBseId(bseId);
+    }
+
 }

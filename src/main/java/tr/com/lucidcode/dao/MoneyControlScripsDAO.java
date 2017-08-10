@@ -27,67 +27,6 @@ public class MoneyControlScripsDAO extends BaseDao<Account> {
     protected static Logger logger = Logger.getLogger("sessionListener");
 
 
-
-
-    /**
-     *
-     * get all results unpagified.
-     *
-     * @return List of accounts
-     * @throws DataException
-//     */
-//    public List<Account> findAll() throws DataException {
-//        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-//        session.beginTransaction();
-//        final Criteria crit = session.createCriteria(Account.class);
-//        List<Account> accountList;
-//        try {
-//            accountList = crit.list();
-//            session.flush();
-//            session.getTransaction().commit();
-//        } catch (Exception e) {
-//            session.getTransaction().rollback();
-//            throw new HibernateException(e.getMessage());
-//        }
-//        return accountList;
-//
-//    }
-
-
-    /**
-     *
-     * get account data by userName, which is unique.
-     *
-     * @param industry
-     * @return List<StockSymbols>
-     * @throws DataException
-     */
-    public List<StockSymbols> findByIndustry(String industry) throws DataException {
-
-        //validate input
-        if (industry == null) {
-            return null;
-        }
-
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.beginTransaction();
-        Criteria crit = session.createCriteria(StockSymbols.class);
-        crit.add(Restrictions.eq("industry", industry));
-        List<StockSymbols> stockSymbols;
-        try {
-            stockSymbols = (List<StockSymbols>) crit.list();
-            session.flush();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new HibernateException(e.getMessage());
-        }
-        logger.info(stockSymbols);
-        System.out.println(stockSymbols);
-        return stockSymbols;
-    }
-
-
     /**
      *
      * get account data by userName, which is unique.
@@ -127,6 +66,38 @@ public class MoneyControlScripsDAO extends BaseDao<Account> {
         }
     }
 
+    public void setPriceStatus(Integer id, Integer status) throws DataException {
+
+        //validate input
+        if (id == null || status == null) {
+            return ;
+        }
+
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+        Criteria crit = session.createCriteria(MoneyControlScrips.class);
+        crit.add(Restrictions.eq("id", id));
+        MoneyControlScrips existing;
+        try {
+            existing = (MoneyControlScrips) crit.uniqueResult();
+            if (existing == null) {
+                logger.debug("Stock Symbol could not be found");
+                session.getTransaction().rollback();
+                return;
+            }
+
+            //update stock symbol status
+
+            existing.setPriceStatus(status);
+            session.save(existing);
+            session.flush();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new HibernateException(e.getMessage());
+        }
+    }
+
     public MoneyControlScrips insert(MoneyControlScrips mcs) throws DataException {
 
         //validate input
@@ -147,6 +118,8 @@ public class MoneyControlScripsDAO extends BaseDao<Account> {
                 existing.setBseId(mcs.getBseId());
                 existing.setNseId(mcs.getNseId());
                 existing.setSector(mcs.getSector());
+                System.out.println("--------------------");
+                System.out.println(existing);
             }else {
                 existing = mcs;
             }
@@ -216,35 +189,28 @@ public class MoneyControlScripsDAO extends BaseDao<Account> {
         return existing;
     }
 
+    public List<String> getAllIndustries() throws DataException {
 
-    /**
-     *
-     * search account by a keyword which is then
-     * compared to name and surname fields
-     *
-     * @param text
-     * @return list of accounts
-     * @throws DataException
-     */
-    public List<Account> textSearch(String text) throws DataException {
+
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
-        Criteria crit = session.createCriteria(Account.class);
-        Criterion name = Restrictions.like("name", text);
-        Criterion surname = Restrictions.like("surname", text);
-        LogicalExpression expression = Restrictions.or(name, surname);
 
-        crit.add(expression);
-        List<Account> accountList;
+        Criteria crit = session.createCriteria(MoneyControlScrips.class);
+        crit.setProjection(Projections.distinct(Projections.property("industry")));
+
+        List<String> existing;
         try {
-            accountList = crit.list();
+            existing = (List<String>) crit.list();
             session.flush();
             session.getTransaction().commit();
+
         } catch (Exception e) {
             session.getTransaction().rollback();
             throw new HibernateException(e.getMessage());
         }
-        return accountList;
+        return existing;
     }
+
+
 
 }
