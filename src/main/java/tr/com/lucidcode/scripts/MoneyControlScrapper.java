@@ -47,7 +47,8 @@ public class MoneyControlScrapper {
 
     String stockFindTemplate = "http://www.moneycontrol.com/india/stockpricequote/%character";
 
-    String baseFolder = "./MoneyControl/";
+    String baseFolder = System.getProperty("catalina.base") + "/MoneyControl/";
+
             //"/Users/adinema/Documents/MoneyControl/";
 
     public void fillStockUrlsTemplate(){

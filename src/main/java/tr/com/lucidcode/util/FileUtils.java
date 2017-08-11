@@ -47,12 +47,25 @@ public class FileUtils {
     }
 
     public static void createFile(String fileName, String content){
+        createParentDirectoryIfNot(fileName);
+
         try{
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
             writer.println(content);
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+    }
+
+    public static void createParentDirectoryIfNot(String fileName){
+        final File file = new File(fileName);
+        final File parent_directory = file.getParentFile();
+
+        if (null != parent_directory)
+        {
+            parent_directory.mkdirs();
         }
 
     }

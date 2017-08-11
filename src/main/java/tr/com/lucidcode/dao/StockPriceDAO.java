@@ -15,6 +15,7 @@ import tr.com.lucidcode.model.Account;
 import tr.com.lucidcode.model.StockPrice;
 import tr.com.lucidcode.model.StockSymbols;
 import tr.com.lucidcode.util.HibernateUtil;
+import tr.com.lucidcode.util.Utils;
 
 import java.util.*;
 
@@ -61,6 +62,7 @@ public class StockPriceDAO extends BaseDao<Account> {
         session.beginTransaction();
         final Criteria crit = session.createCriteria(StockPrice.class);
         crit.add(Restrictions.in("bseId", bseIds));
+        crit.add(Restrictions.in("date", Utils.getSparseDates(new Date())));
         List<StockPrice> stockPriceList;
         try {
             stockPriceList = crit.list();

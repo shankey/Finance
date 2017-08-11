@@ -1,5 +1,6 @@
 package tr.com.lucidcode.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -162,6 +163,7 @@ public class HomeController {
 	public String MCData(HttpServletResponse response, HttpServletRequest request) {
 
         logger.debug("MC Data requested");
+        System.out.println("Current path " + new File(".").getAbsolutePath());
 
         List<String> list = new ArrayList<String>();
         list.add("ROCE");

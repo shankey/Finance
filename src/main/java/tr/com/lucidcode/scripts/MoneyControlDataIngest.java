@@ -33,7 +33,7 @@ public class MoneyControlDataIngest {
     public static String MONEY_CONTROL_ID = "MoneyControlId";
     public static Integer MONEY_CONTROL_SOURCE = 1;
 
-    public String baseFolder = "/Users/adinema/Documents/MoneyControl/";
+    public String baseFolder = System.getProperty("catalina.base") + "/MoneyControl/";
 
 
     public static void main(String argv[]) {

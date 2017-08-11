@@ -18,7 +18,7 @@
   <form action="mcscrape" method="GET" role="form">
       <c:forEach var="ind" items="${industries}">
           <div class="checkbox">
-            <label><input type="checkbox" checked="true" name="industry" value="<c:out value="${ind}" />"><c:out value="${ind}" /></label>
+            <label><input type="checkbox" name="industry" value="<c:out value="${ind}" />"><c:out value="${ind}" /></label>
           </div>
 
       </c:forEach>
