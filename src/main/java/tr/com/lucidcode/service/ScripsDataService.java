@@ -275,7 +275,11 @@ public class ScripsDataService extends BaseService<Account> {
             }
         }
 
-        CsvFileWriter.writeCsvFile(csvOutputFile + sector + ".csv", getCSVHeader(), csvList);
+        try {
+            CsvFileWriter.writeCsvFile(csvOutputFile + sector + ".csv", getCSVHeader(), csvList);
+        }catch (NullPointerException npe){
+            logger.error("CSV file not found : ", npe);
+        }
         return csvList;
     }
 

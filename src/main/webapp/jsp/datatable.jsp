@@ -12,43 +12,79 @@
     <link rel="stylesheet" href="<c:url value="/resources/css/sumoselect.css" />" />
 </head>
 <body>
-<select class="multiSelect">
+<select id="selectIndustry">
     <c:forEach var="industry" items="${industries}">
         <option>${industry}</option>
     </c:forEach>
 </select>
+<button onclick="seeData()">See Data</button>
 
 <br/><br/>
-<button onclick="filterSelectedStocks()">View Selected</button>
-<table id="example" class="display" cellspacing="0" width="100%">
-    <thead>
-    <tr>
-        <th>Metric</th>
-        <th>Report Type</th>
-        <th class="col_stock">Stock</th>
-        <th>2011</th>
-        <th>2012</th>
-        <th>2013</th>
-        <th>2014</th>
-        <th>2015</th>
-        <th>2016</th>
-        <th>2017</th>
-    </tr>
-    </thead>
-</table>
+<c:if test="${not empty industryData}" >
+    <button onclick="filterSelectedStocks()">View Selected</button>
+    <table id="example" class="display" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>Metric</th>
+            <th>Report Type</th>
+            <th class="col_stock">Stock</th>
+            <th>2011</th>
+            <th>2012</th>
+            <th>2013</th>
+            <th>2014</th>
+            <th>2015</th>
+            <th>2016</th>
+            <th>2017</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:forEach var="row" items="${industryData}">
+            <tr data-stock="${row.name}">
+                <td>${row.ratio}</td>
+                <td>${row.reportType}</td>
+                <td>${row.name}</td>
+                <td>${row.year_2011}</td>
+                <td>${row.year_2012}</td>
+                <td>${row.year_2013}</td>
+                <td>${row.year_2014}</td>
+                <td>${row.year_2015}</td>
+                <td>${row.year_2016}</td>
+                <td>${row.year_2017}</td>
+            </tr>
+        </c:forEach>
+        </tbody>
+    </table>
+</c:if>
 <h4>D3 Lab</h4>
 <script>
     var datatable = null;
     var selectedStocks = [];
 
     $(document).ready(function() {
+        $("#selectIndustry").SumoSelect({search: true});
+//    });
+//
+//    function seeData() {
+//        var datasource = "/mcdata?industry="+$("#selectIndustry").val();
         datatable = $('#example').DataTable({
-            ajax : "/resources/data/stock_metric_table" ,
+//            ajax : datasource, //"/resources/data/stock_metric_table" ,
+//            "columns": [
+//                { "data": "ratio" },
+//                { "data": "reportType" },
+//                { "data": "name" },
+//                { "data": "Year_2011" },
+//                { "data": "Year_2012" },
+//                { "data": "Year_2013" },
+//                { "data": "Year_2014" },
+//                { "data": "Year_2015" },
+//                { "data": "Year_2016" },
+//                { "data": "Year_2017" }
+//            ],
             fixedHeader: true,
             paging: false,
             dom: '<"top">rt<"bottom"i><"clear">',
             createdRow: function (row, data, index) {
-                    $(row).attr("data-stock", data[2]);
+                    $(row).attr("data-stock", data.name);
             },
             drawCallback: function( settings ) {
                 $("tr.selected").removeClass('selected');
@@ -84,7 +120,6 @@
                         // Do something
                     });
                 } );
-
             }
         });
 
@@ -102,7 +137,6 @@
                 $(selector).addClass('selected');
             })
         });
-        $(".multiSelect").SumoSelect();
     });
     
     function filterSelectedStocks() {
