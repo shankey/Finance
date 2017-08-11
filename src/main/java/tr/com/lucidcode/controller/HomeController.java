@@ -52,6 +52,20 @@ public class HomeController {
 		return modelAndView;
 	}
 
+	@RequestMapping(value = "/datatable")
+	public ModelAndView showDatatable() {
+		logger.debug("Datatable requested");
+
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.setViewName("datatable");
+
+		List<String> industries = ServiceDispatcher.getMoneyControlScripService().getAllIndustries();
+
+		modelAndView.addObject("industries", industries);
+
+		return modelAndView;
+	}
+
 	@RequestMapping(value = "/profits", produces = "application/json")
 	@ResponseBody
 	public String getProfits(HttpServletResponse response) {
