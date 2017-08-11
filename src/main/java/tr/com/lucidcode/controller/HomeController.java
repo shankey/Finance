@@ -1,6 +1,7 @@
 package tr.com.lucidcode.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,13 +20,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import tr.com.lucidcode.model.StockSymbols;
-import tr.com.lucidcode.pojo.DateValue;
-import tr.com.lucidcode.pojo.MoneyControlDataOutput;
-import tr.com.lucidcode.pojo.PricesOutput;
-import tr.com.lucidcode.pojo.ReportVariableOutput;
+import tr.com.lucidcode.pojo.*;
+import tr.com.lucidcode.scripts.MoneyControlDataIngest;
+import tr.com.lucidcode.scripts.MoneyControlScrapper;
 import tr.com.lucidcode.scripts.XMLParse;
 import tr.com.lucidcode.service.AccountService;
 import tr.com.lucidcode.util.ServiceDispatcher;
+import tr.com.lucidcode.util.Strings;
 
 @Controller
 public class HomeController {
@@ -156,27 +157,75 @@ public class HomeController {
 
 	}
 
-	@RequestMapping(value = "/mcdata", produces = "application/json")
+	@RequestMapping(value = "/mcdata", produces = "application/json", method = RequestMethod.GET)
 	@ResponseBody
-	public String MCData(HttpServletResponse response){
+	public String MCData(HttpServletResponse response, HttpServletRequest request) {
 
-		List<String> list = new ArrayList<String>();
-		list.add("ROCE");
-		list.add("DILUTED EPS");
+        logger.debug("MC Data requested");
 
-		List<List> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector("cementmajor", list);
+        List<String> list = new ArrayList<String>();
+        list.add("ROCE");
+        list.add("DILUTED EPS");
+
+        Map<String, String[]> map = request.getParameterMap();
+
+        String industry = map.get(Strings.INDUSTRY)[0];
+        if(industry==null || industry.equals("")){
+            return null;
+        }
+        List<List> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector(industry, list);
+
+//		List<Map<String, String>> scripRatioDataMapList = new ArrayList<Map<String, String>>();
+//
+//		for(List li: ratioScripDataMap){
+//			Map<String, String> keyVal = new HashMap<String, String>();
+//			keyVal.put("Ratio", (String)li.get(0));
+//			keyVal.put("Report Type", (String)li.get(1));
+//			keyVal.put("Scrip Name", (String)li.get(2));
+//
+//			Integer yearStart = 2011;
+//			for(int i=3; i<=9; i++){
+//				if(li.get(i)!=null){
+//					keyVal.put(yearStart.toString(), li.get(i).toString());
+//				}else{
+//					keyVal.put(yearStart.toString(), "");
+//				}
+//				yearStart++;
+//
+//			}
+//        }
+
+        List<ScripRatioData> scripRatioDataList = new ArrayList<ScripRatioData>();
+        for(List li: ratioScripDataMap) {
+            ScripRatioData scripRatioData = new ScripRatioData();
+            scripRatioData.setRatio((String) li.get(0));
+            scripRatioData.setReportType((String) li.get(1));
+            scripRatioData.setName((String) li.get(2));
+
+
+            scripRatioData.setYear_2011((Float)li.get(3));
+            scripRatioData.setYear_2012((Float)li.get(4));
+            scripRatioData.setYear_2013((Float)li.get(5));
+            scripRatioData.setYear_2014((Float)li.get(6));
+            scripRatioData.setYear_2015((Float)li.get(7));
+            scripRatioData.setYear_2016((Float)li.get(8));
+            scripRatioData.setYear_2017((Float)li.get(9));
+
+            scripRatioDataList.add(scripRatioData);
+
+        }
 
 		addCORS(response);
-
-		logger.debug("MC Data requested");
 
 		Gson gson = new GsonBuilder().setPrettyPrinting()
 				.setDateFormat("dd-MM-yyyy").create();
 
-		String jsonProfitOutput = gson.toJson(ratioScripDataMap);
+		String jsonProfitOutput = gson.toJson(scripRatioDataList);
 
 		return jsonProfitOutput;
 	}
+
+
 
 	@RequestMapping(value = "/mcscrape", produces = "application/json", method = RequestMethod.GET)
 	@ResponseBody
@@ -191,10 +240,17 @@ public class HomeController {
 			}
 		}
 
+		for(String value: map.get(Strings.INDUSTRY)){
+			new MoneyControlScrapper().scrapeForIndustry(value);
+			new MoneyControlDataIngest().getAllFolders(value);
+		}
+
+
+
 		Gson gson = new GsonBuilder().setPrettyPrinting()
 				.setDateFormat("dd-MM-yyyy").create();
 
-		String jsonProfitOutput = gson.toJson("");
+		String jsonProfitOutput = gson.toJson(map.get(Strings.INDUSTRY));
 
 		return jsonProfitOutput;
 	}

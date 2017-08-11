@@ -224,7 +224,7 @@ public class ScripsDataService extends BaseService<Account> {
                             if (dateMap.containsKey(date)) {
                                 li.add(dateMap.get(date).getValue());
                             } else {
-                                li.add("");
+                                li.add(null);
                             }
                         }
                         csvList.add(li);
@@ -240,21 +240,11 @@ public class ScripsDataService extends BaseService<Account> {
                                 if (dateMap.containsKey(date)) {
                                     li.add(dateMap.get(date).getValue());
                                 } else {
-                                    li.add("");
+                                    li.add(null);
                                 }
                             }
                             csvList.add(li);
                         } else {
-
-                            List li1 = new ArrayList();
-                            li1.add(ratio);
-                            li1.add(type);
-                            li1.add(scrip);
-
-                            List li2 = new ArrayList();
-                            li2.add(ratio);
-                            li2.add(type);
-                            li2.add(scrip);
 
                             List li3 = new ArrayList(15);
                             li3.add(ratio);
@@ -263,27 +253,6 @@ public class ScripsDataService extends BaseService<Account> {
 
                             Float[] arr3 = new Float[10];
 
-
-
-                            int init = 0;
-                            for (DateValue dateValue : dataList) {
-                                if (init == 0) {
-                                    init = 1;
-                                    for (Date date : compliantDateSet1) {
-                                        if (Utils.getDays(date, dateValue.getDate()) < 185) {
-                                            break;
-                                        } else {
-                                            li1.add("");
-                                            li2.add("");
-                                        }
-                                    }
-                                }
-
-                                li1.add(dateValue.getDate());
-                                li2.add(dateValue.getValue());
-                            }
-
-
                             for (DateValue dateValue : dataList) {
                                 Integer index = getClosestIndex(dateValue.getDate(), compliantDateSet1);
                                 System.out.println(index);
@@ -291,11 +260,14 @@ public class ScripsDataService extends BaseService<Account> {
                             }
 
                             for(Float fl: arr3){
-                                li3.add(fl);
+                                if(fl==null){
+                                    li3.add(null);
+                                }else{
+                                    li3.add(fl);
+                                }
+
                             }
 
-                            csvList.add(li1);
-                            csvList.add(li2);
                             csvList.add(li3);
                         }
                     }

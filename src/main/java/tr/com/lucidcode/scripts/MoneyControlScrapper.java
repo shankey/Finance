@@ -88,7 +88,7 @@ public class MoneyControlScrapper {
         closeBrowser();
     }
 
-    public void getAllScrips(){
+    public void scrapeForIndustry(String industry){
 
         Capabilities caps = new DesiredCapabilities();
 
@@ -109,7 +109,7 @@ public class MoneyControlScrapper {
 
 
 
-        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry("financehousing");
+        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry(industry);
         System.out.println(list);
 
 
@@ -277,7 +277,7 @@ public class MoneyControlScrapper {
 
         MoneyControlScrapper stockPriceScrapper = new MoneyControlScrapper();
 
-        stockPriceScrapper.getAllScrips();
+        stockPriceScrapper.scrapeForIndustry("financehousing");
 
 
         stockPriceScrapper.closeBrowser();

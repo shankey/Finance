@@ -11,5 +11,7 @@ public class Strings {
     public static String DILUTED_EPS = "DILUTED EPS";
     public static String BASIC_EPS = "BASIC EPS";
 
+    public static String INDUSTRY = "industry";
+
 
 }

@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import tr.com.lucidcode.model.KeyValue;
+import tr.com.lucidcode.model.MoneyControlScrips;
 import tr.com.lucidcode.model.ReportDetails;
 import tr.com.lucidcode.model.Reports;
 import tr.com.lucidcode.util.ServiceDispatcher;
@@ -37,19 +38,35 @@ public class MoneyControlDataIngest {
 
     public static void main(String argv[]) {
 
-        new MoneyControlDataIngest().getAllFolders();
+        //new MoneyControlDataIngest().getAllFolders();
 
     }
 
-    public void getAllFolders(){
+    public Set<String> getScripNameSetForIndustry(String industry){
+        List<MoneyControlScrips> mcsList = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry(industry);
+        Set<String> scripNameSet = new HashSet<String>();
+        for(MoneyControlScrips mcs: mcsList){
+            scripNameSet.add(mcs.getName());
+        }
+
+        return scripNameSet;
+    }
+
+    public void getAllFolders(String industry){
         File folder = new File(baseFolder);
         File[] listOfFiles = folder.listFiles();
+
+        Set<String> scripNameSet = getScripNameSetForIndustry(industry);
 
         for (int i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isDirectory()) {
                 System.out.println("Directory " + listOfFiles[i].getName());
 
                 if(listOfFiles[i].getName().equals(".DS_Store")){
+                    continue;
+                }
+
+                if(!scripNameSet.contains(listOfFiles[i].getName())){
                     continue;
                 }
 
@@ -238,8 +255,4 @@ public class MoneyControlDataIngest {
     }
 
 
-
-    public void readReport(String fileName){
-
-    }
 }
