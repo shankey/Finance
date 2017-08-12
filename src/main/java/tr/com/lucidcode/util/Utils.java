@@ -37,10 +37,11 @@ public class Utils {
     }
 
     public static  List<Date> getSparseDates(Date date2){
-        Date date1 = new Date();
-        date1.setYear(2011);
-        date1.setMonth(1);
-        date1.setDate(3);
+        Calendar c1 = Calendar.getInstance();
+        c1.set(2011,1,3, 0, 0, 0); // Now use today date.
+
+        Date date1 = c1.getTime();
+
 
         List<Date> sparseDateList = new ArrayList<Date>();
         sparseDateList.add(date1);

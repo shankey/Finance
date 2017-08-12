@@ -14,8 +14,8 @@ public class HibernateConfiguration {
 		properties.setProperty(Environment.DIALECT,"org.hibernate.dialect.MySQLDialect");
 		properties.setProperty(Environment.URL, "jdbc:mysql://finance-db-identifier.cahy8ao5jcat.us-east-2.rds.amazonaws.com:3306/finance");
 		properties.setProperty(Environment.DRIVER, "com.mysql.jdbc.Driver");
-		properties.setProperty(Environment.USER, System.getProperty("RDS_SECRET_USER"));
-		properties.setProperty(Environment.PASS, System.getProperty("RDS_SECRET_PASS"));
+		properties.setProperty(Environment.USER, "poha_jalebi");
+		properties.setProperty(Environment.PASS, "indorisev");
 
 		ServiceRegistryBuilder serviceRegistryBuilder = new ServiceRegistryBuilder();
 		serviceRegistryBuilder.applySettings(properties);

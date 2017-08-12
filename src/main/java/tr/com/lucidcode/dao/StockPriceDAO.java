@@ -60,6 +60,7 @@ public class StockPriceDAO extends BaseDao<Account> {
     public List<StockPrice> findByBseIds(List<Integer> bseIds) throws DataException {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
+        System.out.println(Utils.getSparseDates(new Date()));
         final Criteria crit = session.createCriteria(StockPrice.class);
         crit.add(Restrictions.in("bseId", bseIds));
         crit.add(Restrictions.in("date", Utils.getSparseDates(new Date())));
@@ -72,6 +73,7 @@ public class StockPriceDAO extends BaseDao<Account> {
             session.getTransaction().rollback();
             throw new HibernateException(e.getMessage());
         }
+        System.out.println(stockPriceList);
         return stockPriceList;
     }
 

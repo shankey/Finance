@@ -1,5 +1,6 @@
 package tr.com.lucidcode.scripts;
 
+import tr.com.lucidcode.dao.StockPriceDAO;
 import tr.com.lucidcode.model.StockSymbols;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
@@ -14,11 +15,18 @@ public class Main {
 
     public static void main(String args[]) throws ParseException {
 
-        List<String> list = new ArrayList<String>();
-        list.add("ROCE");
-        list.add("DILUTED EPS");
+        List<Integer> li = new ArrayList<Integer>();
+        li.add(500387);
+        long t1 = System.currentTimeMillis();
+        new StockPriceDAO().findByBseIds(li);
+        long t2 = System.currentTimeMillis();
+        System.out.println(t2-t1);
 
-        ServiceDispatcher.getScripsDataService().getDataForSector("mediaentertainment", list);
+//        List<String> list = new ArrayList<String>();
+//        list.add("ROCE");
+//        list.add("DILUTED EPS");
+//
+//        ServiceDispatcher.getScripsDataService().getDataForSector("mediaentertainment", list);
 
 
 //        System.out.println(ss);
