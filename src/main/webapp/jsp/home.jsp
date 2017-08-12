@@ -15,20 +15,29 @@
 
 <body>
 <div class="container-fluid">
+    <div class="checkbox">
+        <label><input type="checkbox" onchange="selectAll(this)" />Select All</label>
+    </div>
   <form action="mcscrape" method="GET" role="form">
       <c:forEach var="ind" items="${industries}">
           <div class="checkbox">
-            <label><input type="checkbox" name="industry" value="<c:out value="${ind}" />"><c:out value="${ind}" /></label>
+            <label><input type="checkbox" class="checkbox" name="industry" value="<c:out value="${ind}" />"><c:out value="${ind}" /></label>
           </div>
 
       </c:forEach>
 
       <button type="submit" class="btn btn-default">Submit</button>
-
   </form>
-
 </div>
-
+<script>
+    function selectAll(selectAll) {
+        if($(selectAll).is(":checked")) {
+            $(".checkbox").prop('checked', true);
+        }else{
+            $(".checkbox").prop('checked', false);
+        }
+    }
+</script>
 
 
 </body>
