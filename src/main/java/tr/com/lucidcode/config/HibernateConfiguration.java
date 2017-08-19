@@ -14,8 +14,7 @@ public class HibernateConfiguration {
 		properties.setProperty(Environment.DIALECT,"org.hibernate.dialect.MySQLDialect");
 		properties.setProperty(Environment.URL, "jdbc:mysql://finance-db-identifier.cahy8ao5jcat.us-east-2.rds.amazonaws.com:3306/finance");
 		properties.setProperty(Environment.DRIVER, "com.mysql.jdbc.Driver");
-		properties.setProperty(Environment.USER, "poha_jalebi");
-		properties.setProperty(Environment.PASS, "hyderabadibiryani");
+
 
 		properties.setProperty("hibernate.connection.provider_class", "org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider");
 		properties.setProperty("hibernate.c3p0.min_size", "5");
@@ -23,6 +22,10 @@ public class HibernateConfiguration {
 		properties.setProperty("hibernate.c3p0.timeout", "300");
 		properties.setProperty("hibernate.c3p0.max_statements", "50");
 		properties.setProperty("hibernate.c3p0.idle_test_period", "300");
+
+		properties.setProperty(Environment.USER, System.getProperty("RDS_SECRET_USER"));
+		properties.setProperty(Environment.PASS, System.getProperty("RDS_SECRET_PASS"));
+
 
 		ServiceRegistryBuilder serviceRegistryBuilder = new ServiceRegistryBuilder();
 		serviceRegistryBuilder.applySettings(properties);
