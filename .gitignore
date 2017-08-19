@@ -6,6 +6,8 @@
 /log.out
 /.idea
 .DS_Store
+spring-mvc-demo.iml
+src/main/java/tr/com/lucidcode/config/HibernateConfiguration.java
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
