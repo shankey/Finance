@@ -11,6 +11,7 @@ import tr.com.lucidcode.pojo.ScripRatioData;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Controller
@@ -42,6 +43,7 @@ public class DataTableController {
         List<String> industries = ServiceDispatcher.getMoneyControlScripService().getAllIndustries();
         modelAndView.addObject("industries", industries);
         modelAndView.addObject("industryData", getIndustryData(industry));
+        modelAndView.addObject("selectedIndustry", industry);
 
         modelAndView.setViewName("datatable");
         return modelAndView;
