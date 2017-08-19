@@ -4,6 +4,8 @@
 /.classpath
 /.project
 /log.out
+/.idea
+.DS_Store
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
