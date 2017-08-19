@@ -227,8 +227,8 @@ public class ReportDetailsDAO extends BaseDao<Account> {
         String industryQuery = moneyControlSripDetailsQuery.replaceAll("%name", name);
         String keysQuery = industryQuery.replaceAll("%datakeys", getWhereClause(reportKeyMappings));
 
-        System.out.println(keysQuery);
 
+        Long t1 = System.currentTimeMillis();
         Query dataQuery = session.createSQLQuery(keysQuery);
         List result;
         try {
@@ -239,11 +239,14 @@ public class ReportDetailsDAO extends BaseDao<Account> {
             session.getTransaction().rollback();
             throw new HibernateException(e.getMessage());
         }
+        Long t2 = System.currentTimeMillis();
+        System.out.println("Full DB Query " + (t2-t1));
 
         List<MoneyControlDataOutput> listOutput = new ArrayList<MoneyControlDataOutput>();
 
         //mcs.name, r.report_type,r.report_date, rd.report_key, rd.report_value
 
+        Long t3 = System.currentTimeMillis();
         for(Object obj: result){
             MoneyControlDataOutput moneyControlDataOutput = new MoneyControlDataOutput();
             Object[] objArray = (Object[]) obj;
@@ -262,6 +265,8 @@ public class ReportDetailsDAO extends BaseDao<Account> {
             listOutput.add(moneyControlDataOutput);
         }
 
+        Long t4 = System.currentTimeMillis();
+        System.out.println("Full DB Query Processing " + (t4-t3));
         return listOutput;
 
     }

@@ -35,7 +35,11 @@ public class ScripsDataService extends BaseService<Account> {
 
     public List<MoneyControlDataOutput> getDataForScrip(String name, List<String> listData){
 
+        Long t1 = System.currentTimeMillis();
         List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMappingByScrip(name, listData);
+        Long t2 = System.currentTimeMillis();
+        System.out.println("Full Data Function = " + (t2-t1));
+
         List<MoneyControlDataOutput> filterMoneyControlDataOutputList = new ArrayList<MoneyControlDataOutput>();
 
         // Stock -> Metrics -> Data - Value
@@ -475,7 +479,11 @@ public class ScripsDataService extends BaseService<Account> {
 
     private Map<Date, StockPrice> getPricesForScrip(String name){
         System.out.println("INSIDE getPricesForScrip");
+
+        Long t1 = System.currentTimeMillis();
         MoneyControlScrips mcs = moneyControlScripsDAO.getByName(name);
+        Long t2 = System.currentTimeMillis();
+        System.out.println("MCS Get By Name " + (t2-t1));
 
         System.out.println("mcs = "+mcs);
 
@@ -485,7 +493,10 @@ public class ScripsDataService extends BaseService<Account> {
 
         List bseIds = new ArrayList<String>();
         bseIds.add(mcs.getBseId());
+        Long t3 = System.currentTimeMillis();
         List<StockPrice> spsList = stockPriceDAO.findByBseIds(bseIds);
+        Long t4 = System.currentTimeMillis();
+        System.out.println("Prices for Name " + (t4-t3));
         System.out.println("spsList =" + spsList);
 
         Map<Date, StockPrice> datePriceMap = new HashMap<Date, StockPrice>();

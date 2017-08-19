@@ -15,7 +15,6 @@ public class HibernateConfiguration {
 		properties.setProperty(Environment.URL, "jdbc:mysql://finance-db-identifier.cahy8ao5jcat.us-east-2.rds.amazonaws.com:3306/finance");
 		properties.setProperty(Environment.DRIVER, "com.mysql.jdbc.Driver");
 
-
 		properties.setProperty("hibernate.connection.provider_class", "org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider");
 		properties.setProperty("hibernate.c3p0.min_size", "5");
 		properties.setProperty("hibernate.c3p0.max_size", "20");
@@ -29,6 +28,7 @@ public class HibernateConfiguration {
 
 		ServiceRegistryBuilder serviceRegistryBuilder = new ServiceRegistryBuilder();
 		serviceRegistryBuilder.applySettings(properties);
+		
 		
 		ServiceRegistry serviceRegistry = serviceRegistryBuilder.buildServiceRegistry();
 		return serviceRegistry;
