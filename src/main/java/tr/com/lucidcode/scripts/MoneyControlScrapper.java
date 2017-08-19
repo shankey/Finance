@@ -51,7 +51,6 @@ public class MoneyControlScrapper {
     String baseFolder = "/Users/adinema/Documents/MoneyControl/";
 
 
-
     public void fillStockUrlsTemplate(){
         for(char alphabet = 'A'; alphabet <= 'Z';alphabet++) {
             String stockFind = stockFindTemplate.replaceAll("%character", alphabet+"");
@@ -83,7 +82,6 @@ public class MoneyControlScrapper {
                     }catch (Exception e){
                         e.printStackTrace();
                     }
-
             }
 
         }
@@ -108,8 +106,9 @@ public class MoneyControlScrapper {
 
         if(scrapeList.size()==0){
             return;
+        }else{
+            System.out.println("Scrape Size = " + scrapeList.size());
         }
-
 
         Capabilities caps = new DesiredCapabilities();
         ((DesiredCapabilities) caps).setJavascriptEnabled(true);
@@ -273,8 +272,11 @@ public class MoneyControlScrapper {
 
 
     public void closeBrowser() {
-        driver.close();
-        driver.quit();
+        if(driver!=null){
+            driver.close();
+            driver.quit();
+        }
+
     }
 
 

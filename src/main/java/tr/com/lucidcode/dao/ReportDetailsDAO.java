@@ -33,9 +33,15 @@ public class ReportDetailsDAO extends BaseDao<Account> {
             "(select * from report_key_mappings) c " +
             "where a.id=b.report_id and b.report_key=c.report_key and c.report_key_mapping in (%report_key)";
 
-    public static final String moneyControlSripDetailsQuery = "select mcs.name, r.report_type, r.report_date, rkm.report_key_mapping, rd.report_value " +
+    public static final String moneyControlIndustryDetailsQuery = "select mcs.name, r.report_type, r.report_date, rkm.report_key_mapping, rd.report_value " +
             "from moneycontrol_scrips mcs, reports r, report_details rd, report_key_mappings rkm " +
             "where mcs.industry='%industry' and mcs.name=r.money_control_id and rd.report_id=r.id " +
+            "and rkm.report_key=rd.report_key and rkm.report_key_mapping in (%datakeys) ;";
+
+
+    public static final String moneyControlSripDetailsQuery = "select mcs.name, r.report_type, r.report_date, rkm.report_key_mapping, rd.report_value, mcs.bse_id " +
+            "from moneycontrol_scrips mcs, reports r, report_details rd, report_key_mappings rkm " +
+            "where mcs.name='%name' and mcs.name=r.money_control_id and rd.report_id=r.id " +
             "and rkm.report_key=rd.report_key and rkm.report_key_mapping in (%datakeys) ;";
 
 
@@ -213,12 +219,60 @@ public class ReportDetailsDAO extends BaseDao<Account> {
 
     }
 
+    public List<MoneyControlDataOutput> findByReportIdsAndDataMappingByScrip(String name, List<String> reportKeyMappings) throws DataException {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+
+
+        String industryQuery = moneyControlSripDetailsQuery.replaceAll("%name", name);
+        String keysQuery = industryQuery.replaceAll("%datakeys", getWhereClause(reportKeyMappings));
+
+        System.out.println(keysQuery);
+
+        Query dataQuery = session.createSQLQuery(keysQuery);
+        List result;
+        try {
+            result =  dataQuery.list();
+            session.flush();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new HibernateException(e.getMessage());
+        }
+
+        List<MoneyControlDataOutput> listOutput = new ArrayList<MoneyControlDataOutput>();
+
+        //mcs.name, r.report_type,r.report_date, rd.report_key, rd.report_value
+
+        for(Object obj: result){
+            MoneyControlDataOutput moneyControlDataOutput = new MoneyControlDataOutput();
+            Object[] objArray = (Object[]) obj;
+            moneyControlDataOutput.setScrip((String)objArray[0]);
+            moneyControlDataOutput.setReportType((String)objArray[1]);
+            moneyControlDataOutput.setDate((Date)objArray[2]);
+            moneyControlDataOutput.setKey((String)objArray[3]);
+
+            try{
+                moneyControlDataOutput.setValue(Float.parseFloat(((String)objArray[4]).replace(",","")));
+            }catch (NumberFormatException e){
+                moneyControlDataOutput.setValue(null);
+            }
+
+
+            listOutput.add(moneyControlDataOutput);
+        }
+
+        return listOutput;
+
+    }
+
+
     public List<MoneyControlDataOutput> findByReportIdsAndDataMapping(String industry, List<String> reportKeyMappings) throws DataException {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
 
 
-        String industryQuery = moneyControlSripDetailsQuery.replaceAll("%industry", industry);
+        String industryQuery = moneyControlIndustryDetailsQuery.replaceAll("%industry", industry);
         String keysQuery = industryQuery.replaceAll("%datakeys", getWhereClause(reportKeyMappings));
 
         System.out.println(keysQuery);
@@ -258,8 +312,6 @@ public class ReportDetailsDAO extends BaseDao<Account> {
         return listOutput;
 
     }
-
-
 
 
 }

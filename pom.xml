@@ -68,11 +68,11 @@
 		</dependency>
 
 		<!-- Hibernate framework -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>${hibernateVersion}</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.hibernate</groupId>-->
+			<!--<artifactId>hibernate-core</artifactId>-->
+			<!--<version>${hibernateVersion}</version>-->
+		<!--</dependency>-->
 
 		<!-- Hibernate validations -->
 		<dependency>
@@ -178,7 +178,6 @@
 
 		<!--Selenium-->
 
-
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-server</artifactId>
@@ -223,6 +222,13 @@
 			<version>1.2.1</version>
 		</dependency>
 
+
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-c3p0 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>4.2.20.Final</version>
+		</dependency>
 
 	</dependencies>
 

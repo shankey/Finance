@@ -41,7 +41,7 @@ public class GraphsController {
 
         List<List> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector(industry, list);
 
-		List<Map<String, String>> scripRatioDataMapList = new ArrayList<Map<String, String>>();
+
 		    //stock     //metric
 		Map<String, Map<String, List<Map<String, String>>>> graphJsonDS = new HashMap<String, Map<String, List<Map<String, String>>>>();
 
@@ -52,6 +52,7 @@ public class GraphsController {
                 continue;
             }
 
+            // Stock -> Metrics -> Data - Value
             Map<String, List<Map<String, String>>> stockMap = graphJsonDS.containsKey(cur_stock) ?
                     graphJsonDS.get(cur_stock) : new HashMap<String, List<Map<String, String>>>();
 

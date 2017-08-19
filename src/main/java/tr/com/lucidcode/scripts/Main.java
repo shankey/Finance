@@ -2,6 +2,7 @@ package tr.com.lucidcode.scripts;
 
 import tr.com.lucidcode.dao.StockPriceDAO;
 import tr.com.lucidcode.model.StockSymbols;
+import tr.com.lucidcode.pojo.MoneyControlDataOutput;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
 import java.text.ParseException;
@@ -15,12 +16,17 @@ public class Main {
 
     public static void main(String args[]) throws ParseException {
 
-        List<Integer> li = new ArrayList<Integer>();
-        li.add(500387);
+
+
         long t1 = System.currentTimeMillis();
-        new StockPriceDAO().findByBseIds(li);
+        List<String> list = new ArrayList<String>();
+        list.add("ROCE");
+        list.add("DILUTED EPS");
+        List<MoneyControlDataOutput> mcdoList = ServiceDispatcher.getScripsDataService().getDataForScrip("acc", list);
         long t2 = System.currentTimeMillis();
         System.out.println(t2-t1);
+
+        System.out.println(mcdoList);
 
 //        List<String> list = new ArrayList<String>();
 //        list.add("ROCE");

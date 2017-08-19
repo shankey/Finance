@@ -1,6 +1,7 @@
 package tr.com.lucidcode.service;
 
 import org.apache.log4j.Logger;
+import org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider;
 import org.springframework.stereotype.Service;
 import tr.com.lucidcode.dao.*;
 import tr.com.lucidcode.model.*;
@@ -31,6 +32,31 @@ public class ScripsDataService extends BaseService<Account> {
     MoneyControlScripsDAO moneyControlScripsDAO = new MoneyControlScripsDAO();
     ReportKeyMappingsDAO reportKeyMappingsDAO = new ReportKeyMappingsDAO();
     StockPriceDAO stockPriceDAO = new StockPriceDAO();
+
+    public List<MoneyControlDataOutput> getDataForScrip(String name, List<String> listData){
+
+        List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMappingByScrip(name, listData);
+        List<MoneyControlDataOutput> filterMoneyControlDataOutputList = new ArrayList<MoneyControlDataOutput>();
+
+        // Stock -> Metrics -> Data - Value
+        Map<String, Map<String, List<Map<String, String>>>> scripRatioDataMap = new HashMap<String, Map<String, List<Map<String, String>>>>();
+
+        for(MoneyControlDataOutput moneyControlDataOutput: moneyControlDataOutputList){
+
+            if(!filterReportTypes(moneyControlDataOutput)){
+                continue;
+            }
+
+            if(!filterByDate(moneyControlDataOutput)){
+                continue;
+            }
+        }
+
+        calculatePEForScrip(name, moneyControlDataOutputList);
+
+        return moneyControlDataOutputList;
+
+    }
 
     public List<List> getDataForSector(String sector, List<String> listData){
 
@@ -305,6 +331,48 @@ public class ScripsDataService extends BaseService<Account> {
         return closestIndex;
     }
 
+    private void calculatePEForScrip(String name, List<MoneyControlDataOutput> mcdoList){
+
+        Map<Date, StockPrice> datePriceMap = getPricesForScrip(name);
+        List<MoneyControlDataOutput> pricesMcdoList = new ArrayList<MoneyControlDataOutput>();
+        List<MoneyControlDataOutput> peMcdoList = new ArrayList<MoneyControlDataOutput>();
+
+        for(MoneyControlDataOutput mcdo : mcdoList){
+
+            if(mcdo.getKey().equals(Strings.DILUTED_EPS)){
+
+                if(mcdo.getValue()==null || mcdo.getDate()==null){
+                    continue;
+                }
+
+                Date dt = Utils.get3MonthsClosestForward(mcdo.getDate(), datePriceMap.keySet());
+
+                if(dt==null){
+                    continue;
+                }
+
+                StockPrice peStockPrice = datePriceMap.get(dt);
+
+                MoneyControlDataOutput pricemcdo = new MoneyControlDataOutput();
+                pricemcdo.setDate(dt);
+                pricemcdo.setValue(peStockPrice.getClose());
+                pricemcdo.setScrip(name);
+                pricemcdo.setKey("Price");
+                pricemcdo.setReportType(mcdo.getReportType());
+                pricesMcdoList.add(pricemcdo);
+
+                MoneyControlDataOutput pemcdo = new MoneyControlDataOutput();
+                pricemcdo.setDate(dt);
+                pricemcdo.setValue(mcdo.getValue()/peStockPrice.getClose());
+                pricemcdo.setScrip(name);
+                pricemcdo.setKey("PE");
+                pricemcdo.setReportType(mcdo.getReportType());
+                peMcdoList.add(pricemcdo);
+
+            }
+        }
+    }
+
     private void calculatePE(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
         Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(Strings.DILUTED_EPS);
 
@@ -403,6 +471,30 @@ public class ScripsDataService extends BaseService<Account> {
         }
 
         return scripPriceMap;
+    }
+
+    private Map<Date, StockPrice> getPricesForScrip(String name){
+        System.out.println("INSIDE getPricesForScrip");
+        MoneyControlScrips mcs = moneyControlScripsDAO.getByName(name);
+
+        System.out.println("mcs = "+mcs);
+
+        if(mcs==null || mcs.getBseId()==null){
+            return null;
+        }
+
+        List bseIds = new ArrayList<String>();
+        bseIds.add(mcs.getBseId());
+        List<StockPrice> spsList = stockPriceDAO.findByBseIds(bseIds);
+        System.out.println("spsList =" + spsList);
+
+        Map<Date, StockPrice> datePriceMap = new HashMap<Date, StockPrice>();
+
+        for(StockPrice sp: spsList){
+            datePriceMap.put(sp.getDate(), sp);
+        }
+
+        return datePriceMap;
     }
 
 
