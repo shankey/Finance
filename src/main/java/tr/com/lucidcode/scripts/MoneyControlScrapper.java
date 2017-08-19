@@ -18,6 +18,7 @@ import tr.com.lucidcode.util.ServiceDispatcher;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -47,9 +48,9 @@ public class MoneyControlScrapper {
 
     String stockFindTemplate = "http://www.moneycontrol.com/india/stockpricequote/%character";
 
-    String baseFolder = System.getProperty("catalina.base") + "/MoneyControl/";
+    String baseFolder = "/Users/adinema/Documents/MoneyControl/";
 
-            //"/Users/adinema/Documents/MoneyControl/";
+
 
     public void fillStockUrlsTemplate(){
         for(char alphabet = 'A'; alphabet <= 'Z';alphabet++) {
@@ -91,33 +92,38 @@ public class MoneyControlScrapper {
 
     public void scrapeForIndustry(String industry){
 
+        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry(industry);
+        System.out.println(list);
+
+        List<MoneyControlScrips> scrapeList = new ArrayList<MoneyControlScrips>();
+
+        for(MoneyControlScrips mcs: list){
+            if(mcs.getStatus() != null && mcs.getStatus()==1){
+                System.out.println("Skipping " + mcs.getName());
+                continue;
+            }else {
+                scrapeList.add(mcs);
+            }
+        }
+
+        if(scrapeList.size()==0){
+            return;
+        }
+
+
         Capabilities caps = new DesiredCapabilities();
-
         ((DesiredCapabilities) caps).setJavascriptEnabled(true);
-
-
         ((DesiredCapabilities) caps).setCapability(
                 PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
-                "/Users/adinema/Documents/Finance/phantomjs/bin/phantomjs"
+                "/opt/phantomjs/bin/phantomjs"
 
         );
 
         driver = new PhantomJSDriver(caps);
-
-
-
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
+        for(MoneyControlScrips mcs: scrapeList){
 
-
-        List<MoneyControlScrips> list = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry(industry);
-        System.out.println(list);
-
-
-        for(MoneyControlScrips mcs: list){
-            if(mcs.getStatus() != null && mcs.getStatus()==1){
-                continue;
-            }
             System.out.println("-----NEXT SCRIP------ " + mcs.getName());
             scrapeScrip(mcs);
         }
@@ -268,6 +274,7 @@ public class MoneyControlScrapper {
 
     public void closeBrowser() {
         driver.close();
+        driver.quit();
     }
 
 
@@ -276,12 +283,14 @@ public class MoneyControlScrapper {
     @PostConstruct
     public static void main(String[] args) throws IOException {
 
-        MoneyControlScrapper stockPriceScrapper = new MoneyControlScrapper();
-
-        stockPriceScrapper.scrapeForIndustry("financehousing");
-
-
-        stockPriceScrapper.closeBrowser();
+        List<String> industries = ServiceDispatcher.getMoneyControlScripService().getAllIndustries();
+        for(String industry: industries){
+            System.out.println("--------------");
+            System.out.println(industry);
+            MoneyControlScrapper stockPriceScrapper = new MoneyControlScrapper();
+            stockPriceScrapper.scrapeForIndustry(industry);
+            stockPriceScrapper.closeBrowser();
+        }
 
     }
 }

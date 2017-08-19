@@ -41,6 +41,8 @@ public class HomeController {
 	public ModelAndView listAll() {
 		
 		logger.debug("Homepage requested");
+        System.out.println("Catalina Base "+System.getProperty("catalina.base") + "/MoneyControl/");
+        System.out.println("Current path " + new File(".").getAbsolutePath());
 
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("home");
@@ -163,7 +165,7 @@ public class HomeController {
 	public String MCData(HttpServletResponse response, HttpServletRequest request) {
 
         logger.debug("MC Data requested");
-        System.out.println("Current path " + new File(".").getAbsolutePath());
+
 
         List<String> list = new ArrayList<String>();
         list.add("ROCE");

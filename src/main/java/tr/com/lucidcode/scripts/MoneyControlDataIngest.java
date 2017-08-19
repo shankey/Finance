@@ -33,12 +33,18 @@ public class MoneyControlDataIngest {
     public static String MONEY_CONTROL_ID = "MoneyControlId";
     public static Integer MONEY_CONTROL_SOURCE = 1;
 
-    public String baseFolder = System.getProperty("catalina.base") + "/MoneyControl/";
+    public String baseFolder = "/Users/adinema/Documents/MoneyControl/";
 
 
     public static void main(String argv[]) {
 
-        //new MoneyControlDataIngest().getAllFolders();
+        List<String> industries = ServiceDispatcher.getMoneyControlScripService().getAllIndustries();
+        for(String industry: industries){
+            System.out.println("--------------");
+            System.out.println(industry);
+            MoneyControlDataIngest moneyControlDataIngest = new MoneyControlDataIngest();
+            moneyControlDataIngest.getAllFolders(industry);
+        }
 
     }
 
@@ -132,7 +138,7 @@ public class MoneyControlDataIngest {
             c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
 
             date = c.getTime();
-            System.out.println(date);
+
 
             map.put(DATE, new KeyValue(DATE, date, map.get("\u00a0").getOrder()));
 
@@ -158,7 +164,7 @@ public class MoneyControlDataIngest {
 
         }
 
-        //System.out.println(reportMap);
+
     }
 
     public Reports ingestReportTable(Map<String, KeyValue> map){
@@ -187,13 +193,13 @@ public class MoneyControlDataIngest {
 
     public void detectReport(Map<String, KeyValue> reportMap, String fileName){
 
-        System.out.println(fileName);
+
 
         //detect script and report type from folder and name
 
         String[] fileNameSplit = fileName.split("\\.");
         String reportType = fileNameSplit[0];
-        System.out.println(reportType);
+
         reportMap.put(REPORT_TYPE, new KeyValue(REPORT_TYPE, reportType, -1));
         reportMap.put(REPORT_SOURCE, new KeyValue(REPORT_SOURCE, MONEY_CONTROL_SOURCE, -1));
 
@@ -242,7 +248,6 @@ public class MoneyControlDataIngest {
                 }
 
                 if(!listReportMaps.get(i-1).containsKey(key)){
-//                    System.out.println(key + " " + columns.get(i).text());
                     listReportMaps.get(i-1).put(key, new KeyValue(key, columns.get(i).text(), init));
                 }
 

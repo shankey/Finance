@@ -177,11 +177,7 @@
 		</dependency>
 
 		<!--Selenium-->
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-java</artifactId>
-			<version>3.4.0</version>
-		</dependency>
+
 
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
@@ -219,11 +215,12 @@
 			<version>1.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.github.klieber/phantomjs-maven-plugin -->
+
+		<!-- https://mvnrepository.com/artifact/com.codeborne/phantomjsdriver -->
 		<dependency>
-			<groupId>com.github.klieber</groupId>
-			<artifactId>phantomjs-maven-plugin</artifactId>
-			<version>0.7</version>
+			<groupId>com.codeborne</groupId>
+			<artifactId>phantomjsdriver</artifactId>
+			<version>1.2.1</version>
 		</dependency>
 
 
@@ -262,11 +259,26 @@
 				<configuration>
 					<url>http://localhost:8080/manager/text</url>
 					<server>TomcatServer</server>
-					<path>/spring-mvc-demo</path>
+					<path>/</path>
 					<username>admin</username>
 					<password>password</password>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>tr.com.lucidcode.scripts.MoneyControlScrapper</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 </project>
