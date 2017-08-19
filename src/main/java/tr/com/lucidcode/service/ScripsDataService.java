@@ -54,11 +54,13 @@ public class ScripsDataService extends BaseService<Account> {
             if(!filterByDate(moneyControlDataOutput)){
                 continue;
             }
+
+            filterMoneyControlDataOutputList.add(moneyControlDataOutput);
         }
 
-        calculatePEForScrip(name, moneyControlDataOutputList);
+        calculatePEForScrip(name, filterMoneyControlDataOutputList);
 
-        return moneyControlDataOutputList;
+        return filterMoneyControlDataOutputList;
 
     }
 
