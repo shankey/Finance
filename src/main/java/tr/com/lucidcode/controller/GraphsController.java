@@ -10,10 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 import tr.com.lucidcode.pojo.MoneyControlDataOutput;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/gph")
@@ -47,6 +44,9 @@ public class GraphsController {
 		Map<String, Map<String, List<Map<String, String>>>> graphJsonDS = new HashMap<String, Map<String, List<Map<String, String>>>>();
 
 		for (MoneyControlDataOutput li: ratioScripDataMap){
+		    if (null == li.getValue()) {
+		        continue;
+            }
             String cur_stock = li.getScrip();
             String ratio = li.getKey() + "_" + li.getReportType();
             ratio = ratio.replace(' ', '-');

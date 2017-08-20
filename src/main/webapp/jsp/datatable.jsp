@@ -134,7 +134,7 @@
 
     ///************* Graph ************//
     // set the dimensions and margins of the graph
-    var margin = {top: 20, right: 20, bottom: 30, left: 0},
+    var margin = {top: 20, right: 20, bottom: 30, left: 30},
         width = 900 - margin.left - margin.right,
         height = 200 - margin.top - margin.bottom;
     // parse the date / time
@@ -224,10 +224,13 @@
             maxValue=null;
         for (var metric in bseData){
             var tmp = null;
+            if (selectedMetrics.length==0 || selectedMetrics.indexOf(metric) > -1) {
+                console.debug(metric + " is selected");
+                tmp = d3.max(bseData[metric].map(function (datum) { return datum.value; }));
+                maxValue = maxValue==null ? tmp : Math.max(tmp, maxValue);
+            }
             tmp = d3.min(bseData[metric].map(function (datum) { return datum.value; }));
             minValue = minValue==null ? tmp : Math.min(tmp, minValue);
-            tmp = d3.max(bseData[metric].map(function (datum) { return datum.value; }));
-            maxValue = maxValue==null ? tmp : Math.max(tmp, maxValue);
         }
         x.domain([minDate, maxDate]);
         y.domain([minValue, maxValue]);
