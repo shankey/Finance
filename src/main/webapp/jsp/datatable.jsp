@@ -23,7 +23,7 @@
         div.tooltip {
             position: absolute;
             text-align: left;
-            min-width: 80px;
+            min-width: 100px;
             padding: 3px 8px;
             font: 12px sans-serif;
             background: lightsteelblue;
@@ -50,6 +50,9 @@
         .selected > .dataPoint {
             r: 3;
             opacity: 0.6;
+        }
+        tr td{
+            text-align: right;
         }
         tr.graphRow td {
             border-bottom: 1px solid #666666;
@@ -149,8 +152,9 @@
         .style("opacity", 0);
     var bseDiv = d3.select("body").append("div")
         .attr("class", "");
-    var selectedBSE = [];
+    var selectedMetrics = [];
     var minDate=parseTime("2011-01-01"), maxDate=parseTime("2017-12-31");
+    var myDataCache = [];
 
 
 
@@ -161,17 +165,21 @@
         "P_by_L" : "P/L After Tax from Ordinary Activities",
     };
     function initializeGraph (d ) {
-        var div = $("<td colspan='7'>");
+        var div = $("<td colspan='8'>");
         $(div).attr("style","padding:1px");
-        var myData;
 
-        var jqxhr = $.ajax( "/gph/${selectedIndustry}/"+d.name, function(data) {
-            console.log( "success" );
-        })
+        var myData;
+        if (d.name in myDataCache) {
+            myData = $.parseJSON(myDataCache[d.name]);
+            createChart(myData, div);
+        }else{
+            var jqxhr = $.ajax( "/gph/${selectedIndustry}/"+d.name, function(data) {
+                console.log( "success" );
+            })
             .done(function(data) {
                 myData = $.parseJSON(data);
+                myDataCache[d.name] = JSON.stringify(myData);
                 createChart(myData, div);
-                return div;
             })
             .fail(function() {
                 console.log( "error" );
@@ -179,7 +187,7 @@
             .always(function() {
                 console.log( "complete" );
             });
-        //createChart(myData, div);
+        }
         return div;
     }
     function createChart(myData, div){
@@ -247,27 +255,31 @@
         return svg;
     }
 
-    function drawLine(myData, svg, metric, stock) {
-        var data = myData[metric][stock];
+    function drawLine(myData, svg, bse, metric) {
+        var data = myData[bse][metric];
+        var isSelected = "";
+        if (selectedMetrics.indexOf(metric)>-1){
+            isSelected = " selected ";
+        };
         var group = svg.append("g")
-            .attr("id", metric+"_bseID"+stock)
-            .attr("class", "graph graph_"+stock)
+            .attr("id", bse+"_"+metric)
+            .attr("class", "graph graph_"+metric + isSelected)
             .on("click", function(d){
-                var index = selectedBSE.indexOf(stock);
+                var index = selectedMetrics.indexOf(metric);
                 if (index > -1){
-                    $(".graph_"+stock).removeClass("selected");
-                    selectedBSE.splice(index, 1);
+                    $(".graph_"+metric).removeClass("selected");
+                    selectedMetrics.splice(index, 1);
                 }else{
-                    $(".graph_"+stock).addClass("selected");
-                    selectedBSE.push(stock);
+                    $(".graph_"+metric).addClass("selected");
+                    selectedMetrics.push(metric);
                 }
-                bseDiv.html(JSON.stringify(selectedBSE));
+                bseDiv.html(JSON.stringify(selectedMetrics));
             })
             .on("mouseover", function(d) {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", .9);
-                tooltip.html("<b>" + "</b><br/>BSE:" + stock)
+                tooltip.html("Metric:" + metric)
                     .style("left", (d3.event.pageX + 5) + "px")
                     .style("top", (d3.event.pageY ) + "px");
             })
@@ -279,8 +291,8 @@
         // Add the valueline path.
         group.append("path")
             .data([data])
-            .attr("class", "line " + metric + " bseID" + stock)
-            .attr("id", "line_"+metric+"_bseID"+stock)
+            .attr("class", "line " + bse + " bseID" + metric)
+            .attr("id", "line_"+bse+"_bseID"+metric)
             .attr("d", valueline)
             .attr("stroke", "black" /*metricsMapData[metric].color */)
         ;
@@ -293,6 +305,15 @@
             .attr("stroke", "black"/*metricsMapData[metric].color*/)
             .attr("cx", function(d) { return x(d.date); })
             .attr("cy", function(d) { return y(d.value); })
+            .on("mouseover", function(d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(formatTime(d.date) + ": <b>" + d.value + "</b><br/>Metric:" + metric)
+                    .style("left", (d3.event.pageX + 5) + "px")
+                    .style("top", (d3.event.pageY ) + "px");
+                event.stopPropagation();
+            })
         ;
     }
 
@@ -401,7 +422,7 @@
                 var rowIdx = "abc";
                 row.child('').show();
 
-                $(row.child()).empty().append($("<td colspan='4'>"))
+                $(row.child()).empty().append($("<td colspan='3'>"))
                     .append(initializeGraph(row.data()));
                 $(row.child()).addClass("graphRow");
 
