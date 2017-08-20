@@ -354,6 +354,7 @@ public class ScripsDataService extends BaseService<Account> {
                 Date dt = Utils.get3MonthsClosestForward(mcdo.getDate(), datePriceMap.keySet());
 
                 if(dt==null){
+                    System.out.println("Null forward date for " + mcdo.getDate());
                     continue;
                 }
 
@@ -374,9 +375,10 @@ public class ScripsDataService extends BaseService<Account> {
                 pricemcdo.setKey("PE");
                 pricemcdo.setReportType(mcdo.getReportType());
                 peMcdoList.add(pricemcdo);
-
             }
         }
+        mcdoList.addAll(pricesMcdoList);
+        mcdoList.addAll(peMcdoList);
     }
 
     private void calculatePE(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){

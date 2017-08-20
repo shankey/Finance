@@ -63,5 +63,9 @@ public class MoneyControlScripsService extends BaseService<Account> {
         moneyControlScripsDAO.setPriceStatus(id, status);
     }
 
+    public List<MoneyControlScrips> getByNames(List<String> names){
+        return moneyControlScripsDAO.getByNames(names);
+    }
+
 
 }

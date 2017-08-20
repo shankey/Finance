@@ -69,6 +69,58 @@ public class StockPriceService extends BaseService<Account> {
         return outputList;
     }
 
+    public Map<Integer, Map<Date, PricesOutput>> getAllStockPrices(List<Integer> bseIds) {
+
+        logger.info("Start Database Operation");
+        List<StockPrice> list = stockPriceDAO.findByBseIds(bseIds);
+        logger.info("End Database Operation");
+        Map<Integer, Map<Date, PricesOutput>> nameDatePriceMap = new HashMap<Integer, Map<Date, PricesOutput>>();
+
+
+
+        for(StockPrice sp: list){
+            PricesOutput po = new PricesOutput();
+            po.setBseId(sp.getBseId());
+            po.setClose(sp.getClose());
+            po.setOpen(sp.getOpen());
+            po.setHigh(sp.getHigh());
+            po.setLow(sp.getLow());
+            po.setVolume(sp.getVolume());
+            po.setPriceDate(sp.getDate());
+
+            if(!nameDatePriceMap.containsKey(po.getBseId())){
+                nameDatePriceMap.put(po.getBseId(), new HashMap<Date, PricesOutput>());
+            }
+
+            Map<Date, PricesOutput> datePriceMap = nameDatePriceMap.get(po.getBseId());
+            datePriceMap.put(po.getPriceDate(), po);
+        }
+
+
+        return nameDatePriceMap;
+    }
+
+    private void insertMissingDates(Map<Date, PricesOutput> datePriceMap, Integer bseId){
+        logger.info("Fill Date Operation");
+        Date minDate = Collections.min(datePriceMap.keySet());
+        Date maxDate = Collections.max(datePriceMap.keySet());
+
+        Set<Date> dateSet = getDateSetBetween(minDate, maxDate);
+
+        for(Date date: dateSet){
+            if(!datePriceMap.containsKey(date)){
+                PricesOutput po = new PricesOutput();
+                po.setBseId(bseId);
+                po.setPriceDate(date);
+                datePriceMap.put(date, po);
+            }
+        }
+        logger.info("End Date Operation");
+
+    }
+
+
+
     public Set<Date> getDateSetBetween(Date minDate, Date maxDate){
 
         Set<Date> dateSet = new HashSet<Date>();

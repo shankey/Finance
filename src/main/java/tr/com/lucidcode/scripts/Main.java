@@ -22,7 +22,7 @@ public class Main {
         List<String> list = new ArrayList<String>();
         list.add("ROCE");
         list.add("DILUTED EPS");
-        List<MoneyControlDataOutput> mcdoList = ServiceDispatcher.getScripsDataService().getDataForScrip("acc", list);
+        List<MoneyControlDataOutput> mcdoList = ServiceDispatcher.getScripsDataService().getDataForScrip("ambujacements", list);
         long t2 = System.currentTimeMillis();
         System.out.println(t2-t1);
 

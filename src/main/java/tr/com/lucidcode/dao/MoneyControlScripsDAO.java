@@ -163,6 +163,32 @@ public class MoneyControlScripsDAO extends BaseDao<Account> {
         return existing;
     }
 
+    public List<MoneyControlScrips> getByNames(List<String> names) throws DataException {
+
+        //validate input
+        if (names == null || names.size()==0) {
+            return null ;
+        }
+
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+
+        Criteria crit = session.createCriteria(MoneyControlScrips.class);
+        crit.add(Restrictions.in("name", names));
+
+        List<MoneyControlScrips> existing = null;
+        try {
+            existing = (List<MoneyControlScrips>) crit.list();
+            session.flush();
+            session.getTransaction().commit();
+
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new HibernateException(e.getMessage());
+        }
+        return existing;
+    }
+
     public List<MoneyControlScrips> getByIndustry(String industry) throws DataException {
 
         //validate input

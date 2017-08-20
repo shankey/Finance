@@ -96,7 +96,7 @@ public class StockPrice implements Comparable  {
     }
 
     public String toString(){
-        return bseId + " " + open + " " + close;
+        return bseId + " " + date + " " + close;
     }
 
     @Override

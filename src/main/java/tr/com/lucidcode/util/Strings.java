@@ -12,6 +12,7 @@ public class Strings {
     public static String BASIC_EPS = "BASIC EPS";
 
     public static String INDUSTRY = "industry";
+    public static String NAME = "name";
 
 
 }
