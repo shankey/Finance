@@ -369,12 +369,12 @@ public class ScripsDataService extends BaseService<Account> {
                 pricesMcdoList.add(pricemcdo);
 
                 MoneyControlDataOutput pemcdo = new MoneyControlDataOutput();
-                pricemcdo.setDate(dt);
-                pricemcdo.setValue(mcdo.getValue()/peStockPrice.getClose());
-                pricemcdo.setScrip(name);
-                pricemcdo.setKey("PE");
-                pricemcdo.setReportType(mcdo.getReportType());
-                peMcdoList.add(pricemcdo);
+                pemcdo.setDate(dt);
+                pemcdo.setValue(mcdo.getValue()/peStockPrice.getClose());
+                pemcdo.setScrip(name);
+                pemcdo.setKey("PE");
+                pemcdo.setReportType(mcdo.getReportType());
+                peMcdoList.add(pemcdo);
             }
         }
         mcdoList.addAll(pricesMcdoList);

@@ -10,6 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 import tr.com.lucidcode.pojo.MoneyControlDataOutput;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -62,7 +63,8 @@ public class GraphsController {
                     stockMap.get(ratio) : new ArrayList<Map<String, String>>();
 
             Map<String, String> keyVal = new HashMap<String, String>();
-            keyVal.put("date", li.getDate().toString() );
+            SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+            keyVal.put("date", DATE_FORMAT.format(li.getDate()));
             keyVal.put("value", li.getValue().toString());
 
             ratioData.add(keyVal);
