@@ -15,6 +15,20 @@
         .details-control{
             cursor: pointer;
         }
+        .col_visibility_toggle{
+            white-space: nowrap;
+            background: #73a9d6;
+            padding: 2px 18px;
+        }
+        .col_visibility_toggle:hover{
+            background: #5a89b4;
+        }
+        th {
+            vertical-align: top;
+        }
+        th.hiddenCol{
+            width: 20px;
+        }
     </style>
     <style>
         svg {
@@ -31,48 +45,49 @@
             border-radius: 2px;
             pointer-events: none;
         }
-        .line {
+        .graph .line {
             fill: none;
             opacity: 0.1;
             stroke-linejoin: round;
             stroke-linecap: round;
             stroke-width: 2;
         }
-        .dataPoint {
-            r: 2;
-            opacity: 0.2;
-            stroke-opacity: 0.2;
-        }
-        .selected > .line {
+        .graph.selected > .line {
             opacity: 0.9;
-            stroke-width: 2;
+            stroke-width: 1;
         }
-        .selected > .dataPoint {
+        .graph.selected > .dataPoint {
             r: 3;
             opacity: 0.6;
         }
-        tr td{
+        th td, tr td{
             text-align: right;
         }
-        tr.graphRow td {
+        table.dataTable tr.graphRow td {
             border-bottom: 1px solid #666666;
+            padding: 4px 0px;
         }
         .axis {
             opacity: 0.4;
         }
         .graph:hover > .line {
-            opacity: 0.8;
-            stroke-width: 3.2;
+            opacity: 0.6;
+            stroke-width: 1.5;
             z-index: 1000;
         }
         .graph > .dataPoint {
             opacity: 0.4;
+            r: 2;
+            stroke-opacity: 0.4;
         }
         .graph:hover > .dataPoint {
             r: 3;
-            opacity: 0.6;
-            fill: orange;
+            opacity: 0.9;
+            fill: black;
             z-index: 1001;
+        }
+        .graph > .dataPoint:hover {
+            r:4;
         }
     </style>
 </head>
@@ -87,21 +102,24 @@
 
 <br/><br/>
 <c:if test="${not empty industryData}" >
+    <table style="float: right">
+        <tr id="visibilityControl"></tr>
+    </table>
     <button onclick="filterSelectedStocks()">View Selected</button>
     <table id="example" class="display" cellspacing="0" width="100%">
         <thead>
         <tr>
-            <th>Metric</th>
-            <th>Report Type</th>
-            <th class="col_stock">Stock</th>
-            <th></th>
-            <th>2011</th>
-            <th>2012</th>
-            <th>2013</th>
-            <th>2014</th>
-            <th>2015</th>
-            <th>2016</th>
-            <th>2017</th>
+            <th><span>Metric</span></th>
+            <th><span>Report Type</span></th>
+            <th class="col_stock"><span>Stock</span></th>
+            <th><span></span></th>
+            <th><span>2011</span></th>
+            <th><span>2012</span></th>
+            <th><span>2013</span></th>
+            <th><span>2014</span></th>
+            <th><span>2015</span></th>
+            <th><span>2016</span></th>
+            <th><span>2017</span></th>
         </tr>
         </thead>
         <tbody>
@@ -128,21 +146,17 @@
     var datatable = null;
     var selectedStocks = [];
 
-    $(document).ready(function() {
-        initializeTable();
-    });
-
     ///************* Graph ************//
     // set the dimensions and margins of the graph
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 900 - margin.left - margin.right,
+    var margin = {top: 20, right: 30, bottom: 30, left: 40},
+        width = 1000 - margin.left - margin.right,
         height = 200 - margin.top - margin.bottom;
     // parse the date / time
     var parseTime = d3.timeParse("%Y-%m-%d");
     // define the line
     var valueline = d3.line()
         .x(function(d) { return x(d.date); })
-        .y(function(d) { return y(d.value); }).curve(d3.curveMonotoneX);
+        .y(function(d) { return y(d.value); });
     // set the ranges
     var x = d3.scaleTime().range([0, width]);
     var y = d3.scaleLinear().range([height, 0]);
@@ -152,7 +166,9 @@
         .style("opacity", 0);
     var bseDiv = d3.select("body").append("div")
         .attr("class", "");
-    var selectedMetrics = [];
+    var metricDiv = d3.select("body").append("div")
+        .attr("class", "");
+    var selectedMetrics = [], graphMetricsList = [];
     var minDate=parseTime("2011-01-01"), maxDate=parseTime("2017-12-31");
     var myDataCache = [];
 
@@ -165,8 +181,8 @@
         "P_by_L" : "P/L After Tax from Ordinary Activities",
     };
     function initializeGraph (d ) {
-        var div = $("<td colspan='8'>");
-        $(div).attr("style","padding:1px");
+        var div = $("<div>");
+        $(div).attr("style","padding:1px; float: right");
 
         var myData;
         if (d.name in myDataCache) {
@@ -208,9 +224,8 @@
 
     function drawChart(myData, div, bse) {
         var bseData = myData[bse];
-
-        //d3.select($(div).get(0));
-
+        width = $("#example").innerWidth() - margin.left - margin.right;
+        x = d3.scaleTime().range([0, width]);
         var svg = d3.select($(div).get(0)).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -236,7 +251,11 @@
         y.domain([minValue, maxValue]);
         for(var metric in bseData){
             drawLine(myData, svg, bse, metric);
+            if(graphMetricsList.indexOf(metric)<0){
+                graphMetricsList.push(metric);
+            }
         }
+        metricDiv.html(JSON.stringify(graphMetricsList));
         // Add the X Axis
         svg.append("text").text(bseMapData[bse]);
         svg.append("g")
@@ -257,7 +276,17 @@
 
         return svg;
     }
-
+    function selectMetric(metric) {
+        var index = selectedMetrics.indexOf(metric);
+        if (index > -1){
+            $(".graph_"+metric).removeClass("selected");
+            selectedMetrics.splice(index, 1);
+        }else{
+            $(".graph_"+metric).addClass("selected");
+            selectedMetrics.push(metric);
+        }
+        bseDiv.html(JSON.stringify(selectedMetrics));
+    }
     function drawLine(myData, svg, bse, metric) {
         var data = myData[bse][metric];
         var isSelected = "";
@@ -268,15 +297,7 @@
             .attr("id", bse+"_"+metric)
             .attr("class", "graph graph_"+metric + isSelected)
             .on("click", function(d){
-                var index = selectedMetrics.indexOf(metric);
-                if (index > -1){
-                    $(".graph_"+metric).removeClass("selected");
-                    selectedMetrics.splice(index, 1);
-                }else{
-                    $(".graph_"+metric).addClass("selected");
-                    selectedMetrics.push(metric);
-                }
-                bseDiv.html(JSON.stringify(selectedMetrics));
+                selectMetric(metric);
             })
             .on("mouseover", function(d) {
                 tooltip.transition()
@@ -317,6 +338,10 @@
                     .style("top", (d3.event.pageY ) + "px");
                 event.stopPropagation();
             })
+            .on("click", function(d){
+                selectMetric(metric);
+                event.stopPropagation();
+            })
         ;
     }
 
@@ -334,6 +359,9 @@
 
 
     /*********** data table functions  ****************/
+    $(document).ready(function() {
+        initializeTable();
+    });
     function initializeTable() {
         $("#selectIndustry").SumoSelect({search: true});
 
@@ -366,15 +394,13 @@
                 })
             },
             initComplete: function () {
+                //adding column filters
                 this.api().columns([0, 1]).every( function (index) {
                     var column = this;
                     var select = $('<br/><select multiple style="width: 85%;"></select>')
                         .appendTo( $(column.header()) )
                         .on( 'change', function () {
-//                            var val = $.fn.dataTable.util.escapeRegex(
-//                                $(this).val()
-//                            );
-                            var val = $(this).val().join("|");
+                            var val = $(this).val().join("$|^");
                             column.search( val ? '^'+val+'$' : '', true, false )
                                 .draw();
                         });
@@ -390,6 +416,23 @@
                         event.stopPropagation();
                     });
                 } );
+                //toggle visibility
+                this.api().columns([0,1,2,4,5,6,7,8,9,10]).every( function (index) {
+                    var column = this;
+                    var toggleButton = $(
+                        "<th class='col_visibility_toggle'>" +
+                        $(column.header()).children().first().html()
+                        +"</th>")
+                        .appendTo($("#visibilityControl"))
+                        .on( 'click', function () {
+                            if (column.visible()){
+                                column.visible(false);
+                            }else{
+                                column.visible(true);
+                            }
+                            event.stopPropagation();
+                        });
+                });
             }
         });
 
@@ -421,12 +464,12 @@
             }
             else {
                 // Open this row
-                //row.child( initializeGraph(row.data()) ).show();
-                var rowIdx = "abc";
-                row.child('').show();
-
-                $(row.child()).empty().append($("<td colspan='3'>"))
-                    .append(initializeGraph(row.data()));
+                row.child( initializeGraph(row.data()) ).show();
+//                var rowIdx = "abc";
+//                row.child('').show();
+//
+//                $(row.child()).empty().append($("<td colspan='3'>"))
+//                    .append(initializeGraph(row.data()));
                 $(row.child()).addClass("graphRow");
 
                 tr.addClass('shown');
