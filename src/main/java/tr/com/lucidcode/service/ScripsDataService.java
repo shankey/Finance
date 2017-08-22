@@ -384,6 +384,10 @@ public class ScripsDataService extends BaseService<Account> {
     private void calculatePE(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
         Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(Strings.DILUTED_EPS);
 
+        if(typeScripDataMap==null || typeScripDataMap.size()==0){
+            return;
+        }
+
         Map<String, Map<Date, StockPrice>> bseIdPriceMap = getPricesForIndustry(sector);
         for(String reportType : typeScripDataMap.keySet()){
 
