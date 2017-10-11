@@ -4,7 +4,10 @@ import org.apache.log4j.Logger;
 import org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider;
 import org.springframework.stereotype.Service;
 import tr.com.lucidcode.dao.*;
+import tr.com.lucidcode.helper.MapHelper;
 import tr.com.lucidcode.model.*;
+import tr.com.lucidcode.operations.Operations;
+import tr.com.lucidcode.operations.Operator;
 import tr.com.lucidcode.pojo.DateValue;
 import tr.com.lucidcode.pojo.MoneyControlDataCSV;
 import tr.com.lucidcode.pojo.MoneyControlDataOutput;
@@ -33,16 +36,14 @@ public class ScripsDataService extends BaseService<Account> {
     ReportKeyMappingsDAO reportKeyMappingsDAO = new ReportKeyMappingsDAO();
     StockPriceDAO stockPriceDAO = new StockPriceDAO();
 
-    public List<MoneyControlDataOutput> getDataForScrip(String name, List<String> listData){
+    //
+    public List<MoneyControlDataOutput> getDataForScrip(String scrip, List<String> ratios){
 
-        Long t1 = System.currentTimeMillis();
-        List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMappingByScrip(name, listData);
-        Long t2 = System.currentTimeMillis();
-        System.out.println("Full Data Function = " + (t2-t1));
+        List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMappingByScrip(scrip, ratios);
 
         List<MoneyControlDataOutput> filterMoneyControlDataOutputList = new ArrayList<MoneyControlDataOutput>();
 
-        // Stock -> Metrics -> Data - Value
+        // scrip -> ratio -> Date-Value
         Map<String, Map<String, List<Map<String, String>>>> scripRatioDataMap = new HashMap<String, Map<String, List<Map<String, String>>>>();
 
         for(MoneyControlDataOutput moneyControlDataOutput: moneyControlDataOutputList){
@@ -58,15 +59,15 @@ public class ScripsDataService extends BaseService<Account> {
             filterMoneyControlDataOutputList.add(moneyControlDataOutput);
         }
 
-        calculatePEForScrip(name, filterMoneyControlDataOutputList);
+        calculatePEForScrip(scrip, filterMoneyControlDataOutputList);
 
         return filterMoneyControlDataOutputList;
 
     }
 
-    public List<List> getDataForSector(String sector, List<String> listData){
+    public List<List> getDataForSector(String sector, List<String> ratios){
 
-        List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMapping(sector, listData);
+        List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMapping(sector, ratios);
 
         //ratio ->report_type -> scrip -> date and value
         Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap = new HashMap<String, Map<String, Map<String, List<DateValue>>>>();
@@ -105,11 +106,47 @@ public class ScripsDataService extends BaseService<Account> {
 
         }
 
-        calculatePE(sector, ratioTypeScripDataMap);
+        addPriceToMap(sector, ratioTypeScripDataMap, Strings.DILUTED_EPS);
+        Operations.operate(Strings.PE, ratioTypeScripDataMap, Strings.DILUTED_EPS_PRICE, Strings.DILUTED_EPS, Operator.DIV);
 
         return writeCSV(sector, ratioTypeScripDataMap);
 
 
+    }
+
+    private void addPriceToMap(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap, String referenceRatio) {
+
+        Map<String, Map<Date, StockPrice>> bseIdPriceMap = getPricesForIndustry(sector);
+        Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(referenceRatio);
+
+        if (typeScripDataMap == null || typeScripDataMap.size() == 0) {
+            return;
+        }
+
+        for (String reportType : typeScripDataMap.keySet()) {
+
+            Map<String, List<DateValue>> scripDataMap = typeScripDataMap.get(reportType);
+
+            for(String scrip : scripDataMap.keySet()){
+                Map<Date, StockPrice> datePriceMap = bseIdPriceMap.get(scrip);
+
+                if(datePriceMap==null || datePriceMap.size()==0){
+                    continue;
+                }
+
+                List<DateValue> dataList = scripDataMap.get(scrip);
+
+                for(DateValue dateValue: dataList){
+                    Date dt = Utils.get3MonthsClosestForward(dateValue.getDate(), datePriceMap.keySet());
+                    if(dt==null){
+                        continue;
+                    }
+
+                    MapHelper.addToMap(ratioTypeScripDataMap, Strings.DILUTED_EPS_PRICE, reportType, scrip, dateValue.getDate(), datePriceMap.get(dt).getClose());
+                }
+            }
+
+        }
     }
 
     private Boolean filterByDate(MoneyControlDataOutput mcdo){
@@ -382,6 +419,7 @@ public class ScripsDataService extends BaseService<Account> {
     }
 
     private void calculatePE(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
+
         Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(Strings.DILUTED_EPS);
 
         if(typeScripDataMap==null || typeScripDataMap.size()==0){

@@ -10,6 +10,8 @@ public class Strings {
 
     public static String DILUTED_EPS = "DILUTED EPS";
     public static String BASIC_EPS = "BASIC EPS";
+    public static String DILUTED_EPS_PRICE = "DILUTED EPS PRICE";
+    public static String PE = "PE";
 
     public static String INDUSTRY = "industry";
     public static String NAME = "name";

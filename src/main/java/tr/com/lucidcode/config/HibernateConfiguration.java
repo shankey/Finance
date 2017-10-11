@@ -22,8 +22,8 @@ public class HibernateConfiguration {
 		properties.setProperty("hibernate.c3p0.max_statements", "50");
 		properties.setProperty("hibernate.c3p0.idle_test_period", "300");
 
-		properties.setProperty(Environment.USER, System.getProperty("RDS_SECRET_USER"));
-		properties.setProperty(Environment.PASS, System.getProperty("RDS_SECRET_PASS"));
+		properties.setProperty(Environment.USER, "poha_jalebi");
+		properties.setProperty(Environment.PASS, "gingertea");
 
 
 		ServiceRegistryBuilder serviceRegistryBuilder = new ServiceRegistryBuilder();

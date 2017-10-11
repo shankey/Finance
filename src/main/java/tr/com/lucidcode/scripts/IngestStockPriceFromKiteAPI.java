@@ -85,11 +85,11 @@ public class IngestStockPriceFromKiteAPI {
     }
 
     public void ingestAllScripsForIndustry(String industry) throws KiteException, IOException {
-        List<MoneyControlScrips> mcsList = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry("mediaentertainment");
+        List<MoneyControlScrips> mcsList = ServiceDispatcher.getMoneyControlScripService().getAllByIndustry(industry);
         Map<Long, Instrument> scripInstrumentMap = zw.getAllInstruments(kiteconnect);
 
         for(MoneyControlScrips mcs: mcsList){
-            if(mcs.getBseId()==null || mcs.getNseId()==null){
+            if(mcs == null || mcs.getBseId()==null || mcs.getNseId()==null || mcs.getPriceStatus()==1){
                 continue;
             }
 
