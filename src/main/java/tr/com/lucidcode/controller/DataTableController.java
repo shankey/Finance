@@ -120,6 +120,7 @@ public class DataTableController {
             scripRatioData.setYear_2017((Float)li.get(9));
 
             scripRatioDataList.add(scripRatioData);
+
         }
 
         return scripRatioDataList;

@@ -8,6 +8,7 @@ import tr.com.lucidcode.model.Account;
 import tr.com.lucidcode.model.RatioDetails;
 import tr.com.lucidcode.model.Reports;
 import tr.com.lucidcode.pojo.IndustryCap;
+import tr.com.lucidcode.util.ServiceDispatcher;
 import tr.com.lucidcode.util.Strings;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public class RatioDetailsService extends BaseService<Account> {
 
     public List<List> compareSectors(List<RatioDetails> ratioDetails, Integer startYear, Integer endYear){
         Map<String, List<RatioDetails>> sectorRatioDetailsListMap = new HashMap<String, List<RatioDetails>>();
+        List<IndustryCap> industryCapList = ServiceDispatcher.getRatioDetailsService().getIndustryCaps();
 
         for(RatioDetails rds: ratioDetails){
             if(sectorRatioDetailsListMap.get(rds.getSector())==null){
@@ -121,9 +123,72 @@ public class RatioDetailsService extends BaseService<Account> {
             li.add(sum2017);
             csvList.add(li);
             csvList.add(addAsPercentFromBaseYear(startYear, li, Strings.MARKET_CAP_PERCENTAGE));
+            csvList.add(addTotalSectorValue(li, Strings.SECTOR_PERCENTAGE, industryCapList));
         }
         return csvList;
 
+    }
+
+    public List addTotalSectorValue(List li, String newRatio, List<IndustryCap> industryCapList){
+        List totalSectorList = new ArrayList();
+
+        totalSectorList.add(newRatio);
+        totalSectorList.add(li.get(1));
+        totalSectorList.add(li.get(2));
+        String sector = (String)li.get(2);
+        IndustryCap ic = getIndustryCapFromSector(sector, industryCapList);
+        if(li.get(3)!=null && ic.getYear2011()!=null){
+            totalSectorList.add((100f*(Float)li.get(3)/Float.parseFloat(ic.getYear2011().toString())));
+        }else{
+            totalSectorList.add(null);
+        }
+
+        if(li.get(4)!=null && ic.getYear2012()!=null){
+            totalSectorList.add(100f*(Float)li.get(4)/Float.parseFloat(ic.getYear2012().toString()));
+        }else{
+            totalSectorList.add(null);
+        }
+
+        if(li.get(3)!=null && ic.getYear2013()!=null){
+            totalSectorList.add(100f*(Float)li.get(5)/Float.parseFloat(ic.getYear2013().toString()));
+        }else{
+            totalSectorList.add(null);
+        }
+
+        if(li.get(3)!=null && ic.getYear2014()!=null){
+            totalSectorList.add(100f*(Float)li.get(6)/Float.parseFloat(ic.getYear2014().toString()));
+        }else{
+            totalSectorList.add(null);
+        }
+
+        if(li.get(3)!=null && ic.getYear2015()!=null){
+            totalSectorList.add(100f*(Float)li.get(7)/Float.parseFloat(ic.getYear2015().toString()));
+        }else{
+            totalSectorList.add(null);
+        }
+
+        if(li.get(3)!=null && ic.getYear2016()!=null){
+            totalSectorList.add(100f*(Float)li.get(8)/Float.parseFloat(ic.getYear2016().toString()));
+        }else{
+            totalSectorList.add(null);
+        }
+
+        if(li.get(3)!=null && ic.getYear2017()!=null){
+            totalSectorList.add(100f*(Float)li.get(9)/Float.parseFloat(ic.getYear2017().toString()));
+        }else{
+            totalSectorList.add(null);
+        }
+
+        return totalSectorList;
+    }
+
+    public IndustryCap getIndustryCapFromSector(String sector, List<IndustryCap> industryCapList){
+        for(IndustryCap ic: industryCapList){
+            if(sector.equals(ic.getSector())){
+                return ic;
+            }
+        }
+        return null;
     }
 
     public List addAsPercentFromBaseYear(Integer baseYear, List li, String newRatio){
