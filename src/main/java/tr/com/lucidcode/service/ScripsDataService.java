@@ -67,6 +67,12 @@ public class ScripsDataService extends BaseService<Account> {
 
     public List<List> getDataForSector(String sector, List<String> ratios){
 
+        Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap = getMapDataForSector(sector, ratios);
+        return getAsList(ratioTypeScripDataMap);
+
+    }
+
+    public Map<String, Map<String, Map<String, List<DateValue>>>> getMapDataForSector(String sector, List<String> ratios){
         List<MoneyControlDataOutput> moneyControlDataOutputList = reportDetailsDAO.findByReportIdsAndDataMapping(sector, ratios);
 
         //ratio ->report_type -> scrip -> date and value
@@ -82,39 +88,22 @@ public class ScripsDataService extends BaseService<Account> {
                 continue;
             }
 
-            if(!ratioTypeScripDataMap.containsKey(moneyControlDataOutput.getKey())){
-
-                ratioTypeScripDataMap.put(moneyControlDataOutput.getKey(), new HashMap<String, Map<String, List<DateValue>>>());
-            }
-
-            Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(moneyControlDataOutput.getKey());
-
-            if(!typeScripDataMap.containsKey(moneyControlDataOutput.getReportType())){
-                typeScripDataMap.put(moneyControlDataOutput.getReportType(), new HashMap<String, List<DateValue>>());
-            }
-
-            Map<String, List<DateValue>> scripDataMap = typeScripDataMap.get(moneyControlDataOutput.getReportType());
-
-            if(!scripDataMap.containsKey(moneyControlDataOutput.getScrip())){
-                scripDataMap.put(moneyControlDataOutput.getScrip(), new ArrayList<DateValue>());
-            }
-
-            List<DateValue> dataList = scripDataMap.get(moneyControlDataOutput.getScrip());
-
-
-            dataList.add(new DateValue(moneyControlDataOutput.getDate(), moneyControlDataOutput.getValue()));
+            MapHelper.addToMap(ratioTypeScripDataMap, moneyControlDataOutput.getKey(), moneyControlDataOutput.getReportType(),
+                    moneyControlDataOutput.getScrip(), moneyControlDataOutput.getDate(), moneyControlDataOutput.getValue());
 
         }
 
-        addPriceToMap(sector, ratioTypeScripDataMap, Strings.DILUTED_EPS);
+        addPriceToMap(sector, ratioTypeScripDataMap, Strings.DILUTED_EPS, Strings.DILUTED_EPS_PRICE);
         Operations.operate(Strings.PE, ratioTypeScripDataMap, Strings.DILUTED_EPS_PRICE, Strings.DILUTED_EPS, Operator.DIV);
+        Operations.operate(Strings.NO_OF_SHARES, Strings.GENERATED, ratioTypeScripDataMap, Strings.EQUITY_SHARE_CAPITAL, Strings.RT_BALANCE, Strings.FACE_VALUE, Strings.RT_KEYFINRATIO, Operator.DIV);
+        addPriceToMap(sector, ratioTypeScripDataMap, Strings.NO_OF_SHARES, Strings.NO_OF_SHARES_PRICE);
+        Operations.operate(Strings.MARKET_CAP, ratioTypeScripDataMap, Strings.NO_OF_SHARES, Strings.NO_OF_SHARES_PRICE, Operator.MUL);
 
-        return writeCSV(sector, ratioTypeScripDataMap);
-
+        return ratioTypeScripDataMap;
 
     }
 
-    private void addPriceToMap(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap, String referenceRatio) {
+    private void addPriceToMap(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap, String referenceRatio, String newRatio) {
 
         Map<String, Map<Date, StockPrice>> bseIdPriceMap = getPricesForIndustry(sector);
         Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(referenceRatio);
@@ -142,7 +131,7 @@ public class ScripsDataService extends BaseService<Account> {
                         continue;
                     }
 
-                    MapHelper.addToMap(ratioTypeScripDataMap, Strings.DILUTED_EPS_PRICE, reportType, scrip, dateValue.getDate(), datePriceMap.get(dt).getClose());
+                    MapHelper.addToMap(ratioTypeScripDataMap, newRatio, reportType, scrip, dateValue.getDate(), datePriceMap.get(dt).getClose());
                 }
             }
 
@@ -174,6 +163,14 @@ public class ScripsDataService extends BaseService<Account> {
         }
 
         if(ratio.equals("DILUTED EPS") && (reportType.equals("cons_yearly")) || reportType.equals("yearly")){
+            return true;
+        }
+
+        if(ratio.equals("EQUITY_SHARE_CAPITAL") && (reportType.equals("cons_balance")) || reportType.equals("balance")){
+            return true;
+        }
+
+        if(ratio.equals("FACE VALUE") && (reportType.equals("cons_keyfinratio")) || reportType.equals("keyfinratio")){
             return true;
         }
 
@@ -254,10 +251,14 @@ public class ScripsDataService extends BaseService<Account> {
 
     }
 
-    private List<List> writeCSV(String sector, Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
+    public List<List> getAsList(Map<String, Map<String, Map<String, List<DateValue>>>> ratioTypeScripDataMap){
         List<List> csvList = new ArrayList<List>();
         for(String ratio: ratioTypeScripDataMap.keySet()){
             Map<String, Map<String, List<DateValue>>> typeScripDataMap = ratioTypeScripDataMap.get(ratio);
+
+            if(typeScripDataMap==null){
+                return null;
+            }
 
             for(String type: typeScripDataMap.keySet()) {
                 Map<String, List<DateValue>> scripData = typeScripDataMap.get(type);
@@ -344,11 +345,11 @@ public class ScripsDataService extends BaseService<Account> {
             }
         }
 
-        try {
-            CsvFileWriter.writeCsvFile(csvOutputFile + sector + ".csv", getCSVHeader(), csvList);
-        }catch (NullPointerException npe){
-            logger.error("CSV file not found : ", npe);
-        }
+//        try {
+//            CsvFileWriter.writeCsvFile(csvOutputFile + sector + ".csv", getCSVHeader(), csvList);
+//        }catch (NullPointerException npe){
+//            logger.error("CSV file not found : ", npe);
+//        }
         return csvList;
     }
 

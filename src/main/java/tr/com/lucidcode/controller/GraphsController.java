@@ -40,7 +40,6 @@ public class GraphsController {
 
         List<MoneyControlDataOutput> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForScrip(stock, list);
 
-
 		    //stock     //metric
 		Map<String, Map<String, List<Map<String, String>>>> graphJsonDS = new HashMap<String, Map<String, List<Map<String, String>>>>();
 

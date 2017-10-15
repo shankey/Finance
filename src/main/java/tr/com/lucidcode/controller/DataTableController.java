@@ -53,6 +53,8 @@ public class DataTableController {
         List<String> list = new ArrayList<String>();
         list.add("ROCE");
         list.add("DILUTED EPS");
+        list.add("EQUITY_SHARE_CAPITAL");
+        list.add("FACE VALUE");
 
         List<List> ratioScripDataMap = ServiceDispatcher.getScripsDataService().getDataForSector(industry, list);
         List<ScripRatioData> scripRatioDataList = new ArrayList<ScripRatioData>();
