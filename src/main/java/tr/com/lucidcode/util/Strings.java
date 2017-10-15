@@ -17,6 +17,7 @@ public class Strings {
     public static String NO_OF_SHARES = "NO OF SHARES";
     public static String NO_OF_SHARES_PRICE = "NO OF SHARES PRICE";
     public static String MARKET_CAP = "MARKET CAP";
+    public static String MARKET_CAP_PERCENTAGE = "MARKET CAP PERCENTAGE";
 
     public static String INDUSTRY = "industry";
     public static String NAME = "name";

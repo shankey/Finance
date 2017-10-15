@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="tr.com.lucidcode.model">
+
+    <class name="RatioDetails" table="ratio_details">
+        <id name="id" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="moneyControlId"  column="money_control_id"/>
+        <property name="ratio"/>
+        <property name="reportType" column="report_type"/>
+        <property name="sector" column="sector"/>
+
+        <property name="year2011"  column="year_2011"/>
+        <property name="year2012"  column="year_2012"/>
+        <property name="year2013"  column="year_2013"/>
+        <property name="year2014"  column="year_2014"/>
+        <property name="year2015"  column="year_2015"/>
+        <property name="year2016"  column="year_2016"/>
+        <property name="year2017"  column="year_2017"/>
+
+    </class>
+
+</hibernate-mapping>

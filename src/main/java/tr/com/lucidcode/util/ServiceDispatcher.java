@@ -18,6 +18,7 @@ public class ServiceDispatcher {
 	private static MoneyControlScripsService singletonMoneyControlScripService;
 	private static ScripsDataService singletonScripDataService;
 	private static MutualFundsService singletonMutualFundsService;
+	private static RatioDetailsService singletonRatioDetailsService;
 
 	public static AccountService getAccountService() {
 		if (singletonAccountService == null) {
@@ -80,5 +81,13 @@ public class ServiceDispatcher {
 			singletonMutualFundsService = new MutualFundsService();
 		}
 		return singletonMutualFundsService;
+	}
+
+
+	public static RatioDetailsService getRatioDetailsService() {
+		if (singletonRatioDetailsService == null) {
+			singletonRatioDetailsService = new RatioDetailsService();
+		}
+		return singletonRatioDetailsService;
 	}
 }

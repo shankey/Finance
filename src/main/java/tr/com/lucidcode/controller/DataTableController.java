@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import tr.com.lucidcode.model.RatioDetails;
 import tr.com.lucidcode.pojo.ScripRatioData;
 import tr.com.lucidcode.util.ServiceDispatcher;
 
@@ -79,4 +80,50 @@ public class DataTableController {
 
         return scripRatioDataList;
     }
+
+    @RequestMapping(value = "/market/{startYear}/{endYear}")
+    public ModelAndView compareIndustries(@PathVariable Integer startYear, @PathVariable Integer endYear) {
+
+
+        ModelAndView modelAndView = new ModelAndView();
+
+        String industry = "aquaculture";
+        List<RatioDetails> ratioDetails = ServiceDispatcher.getRatioDetailsService().getScripMarketCaps(startYear, endYear);
+        List<List> sectorList = ServiceDispatcher.getRatioDetailsService().compareSectors(ratioDetails, startYear, endYear);
+        modelAndView.addObject("industries", new ArrayList<String>());
+        modelAndView.addObject("industryData", getRatioDetailsAsScripRatioData(sectorList));
+        modelAndView.addObject("selectedIndustry", industry);
+
+        modelAndView.setViewName("datatable");
+
+
+        return modelAndView;
+    }
+
+    //temporary hacky adapter
+    public List<ScripRatioData> getRatioDetailsAsScripRatioData(List<List> sectorList){
+
+        List<ScripRatioData> scripRatioDataList = new ArrayList<ScripRatioData>();
+
+        for(List li: sectorList) {
+            ScripRatioData scripRatioData = new ScripRatioData();
+            scripRatioData.setRatio((String) li.get(0));
+            scripRatioData.setReportType((String) li.get(1));
+            scripRatioData.setName((String) li.get(2));
+
+            scripRatioData.setYear_2011((Float)li.get(3));
+            scripRatioData.setYear_2012((Float)li.get(4));
+            scripRatioData.setYear_2013((Float)li.get(5));
+            scripRatioData.setYear_2014((Float)li.get(6));
+            scripRatioData.setYear_2015((Float)li.get(7));
+            scripRatioData.setYear_2016((Float)li.get(8));
+            scripRatioData.setYear_2017((Float)li.get(9));
+
+            scripRatioDataList.add(scripRatioData);
+        }
+
+        return scripRatioDataList;
+
+    }
+
 }

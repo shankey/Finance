@@ -103,7 +103,7 @@ public class Operations {
                     Date date1 = dateValue1.getDate();
                     DateValue dateValue2 = findInDateValues(dateValues2, date1);
 
-                    if(dateValue2==null){
+                    if(dateValue2==null || dateValue2.getValue()==null || dateValue1.getValue()==null){
                         continue;
                     }
 
