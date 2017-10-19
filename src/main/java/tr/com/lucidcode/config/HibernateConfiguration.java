@@ -22,8 +22,10 @@ public class HibernateConfiguration {
 		properties.setProperty("hibernate.c3p0.max_statements", "50");
 		properties.setProperty("hibernate.c3p0.idle_test_period", "300");
 
-		properties.setProperty(Environment.USER, "poha_jalebi");
-		properties.setProperty(Environment.PASS, "gingertea");
+		//add below command in /usr/local/Cellar/tomcat/8.5.11/libexec/bin/setenv.sh to run locally
+		//export JAVA_OPTS="$JAVA_OPTS -DRDS_SECRET_USER=[user_name] -DRDS_SECRET_PASS=[p@$$w0rd]";
+		properties.setProperty(Environment.USER, System.getProperty("RDS_SECRET_USER"));
+		properties.setProperty(Environment.PASS, System.getProperty("RDS_SECRET_PASS"));
 
 
 		ServiceRegistryBuilder serviceRegistryBuilder = new ServiceRegistryBuilder();
