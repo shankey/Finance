@@ -230,6 +230,7 @@
 			<version>4.2.20.Final</version>
 		</dependency>
 
+
 	</dependencies>
 
 	<repositories>
@@ -239,6 +240,8 @@
 			<url>https://oss.sonatype.org/content/repositories/springsource-milestones</url>
 		</repository>
 	</repositories>
+
+
 
 	<!-- Build Configuration | | Use "jetty:stop jetty:run" to start the server. 
 		| -->

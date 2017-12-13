@@ -118,6 +118,8 @@ public class ScripsDataService extends BaseService<Account> {
 
             for(String scrip : scripDataMap.keySet()){
                 Map<Date, StockPrice> datePriceMap = bseIdPriceMap.get(scrip);
+                logger.info("Prices for Scrip " + scrip);
+                logger.info(datePriceMap);
 
                 if(datePriceMap==null || datePriceMap.size()==0){
                     continue;
@@ -126,6 +128,7 @@ public class ScripsDataService extends BaseService<Account> {
                 List<DateValue> dataList = scripDataMap.get(scrip);
 
                 for(DateValue dateValue: dataList){
+                    logger.info("date for scrip for ratio " + scrip + " " + dateValue.getDate() + " " + referenceRatio);
                     Date dt = Utils.get3MonthsClosestForward(dateValue.getDate(), datePriceMap.keySet());
                     if(dt==null){
                         continue;
@@ -501,15 +504,15 @@ public class ScripsDataService extends BaseService<Account> {
     }
 
     private Map<String, Map<Date, StockPrice>> getPricesForIndustry(String sector){
-        System.out.println("INSIDE getPrices");
+
         List<MoneyControlScrips> mcsList = moneyControlScripsDAO.getByIndustry(sector);
-        System.out.println("mcsList = "+mcsList);
+        logger.info("mcsList = "+mcsList);
         Map<Integer, String> bseIdsScripMap = new HashMap<Integer, String>();
         for(MoneyControlScrips mcs: mcsList){
             bseIdsScripMap.put(mcs.getBseId(), mcs.getName());
         }
         List<StockPrice> spsList = stockPriceDAO.findByBseIds(new ArrayList<Integer>(bseIdsScripMap.keySet()));
-        System.out.println("spsList =" + spsList);
+        logger.info("spsList =" + spsList);
 
         Map<String, Map<Date, StockPrice>> scripPriceMap = new HashMap<String, Map<Date, StockPrice>>();
 

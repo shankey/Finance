@@ -63,7 +63,7 @@ public class StockPriceDAO extends BaseDao<Account> {
         System.out.println(Utils.getSparseDates(new Date()));
         final Criteria crit = session.createCriteria(StockPrice.class);
         crit.add(Restrictions.in("bseId", bseIds));
-        crit.add(Restrictions.in("date", Utils.getSparseDates(new Date())));
+
         List<StockPrice> stockPriceList;
         try {
             stockPriceList = crit.list();
